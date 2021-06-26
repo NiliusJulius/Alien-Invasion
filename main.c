@@ -7,6 +7,16 @@
 #include "sprites\MultipleEnemySprites.h"
 #include "maps\WindowMap.h"
 
+#define PLAYER_TILE_INDEX 0
+#define PLAYER_BULLET_TILE_INDEX 4
+#define ENEMY_TILE_INDEX 6
+
+#define SPRITE_WIDTH 8
+#define SPRITE_HEIGHT 16
+
+// Because we are running in 8x16 sprite mode, all tile indexes should be multiplied by 2.
+#define TILE_INDEX_MULTIPLIER 2
+
 UINT16 score = 0;
 
 // Player
@@ -25,17 +35,23 @@ typedef struct Player {
 typedef struct Bullet {
   UINT8 spriteCount;
   UINT8 spriteIndex;
-  UINT8 speed;
   UINT8 location[2];
-  UINT8 spriteWidthOffset;
-  UINT8 spriteHeightOffset;
+  UINT8 speed;
+  UINT8 spriteLeftOffset;
+  UINT8 spriteRightOffset;
+  UINT8 spriteTopOffset;
+  UINT8 spriteBottomOffset;
 } Bullet;
 
 typedef struct Enemy {
   UINT8 spriteIndex;
   UINT8 location[2];
-  UINT8 spriteWidthOffset;
-  UINT8 spriteHeightOffset;
+  UINT8 spriteLeftOffset;
+  UINT8 spriteRightOffset;
+  UINT8 spriteTopOffset;
+  UINT8 spriteBottomOffset;
+  BOOLEAN topEnemy;
+  BOOLEAN bottomEnemy;
 } Enemy;
 
 void performantdelay(UINT8 numloops){
@@ -56,20 +72,20 @@ void animateSprite(UINT8 spriteIndex, UINT8 frameCount, UINT8 animationSpeed, UI
     currentFrame = *timeSinceAnimationStart / animationSpeed;
   }
 
-  set_sprite_tile(spriteIndex, currentFrame);
+  set_sprite_tile(spriteIndex, currentFrame * TILE_INDEX_MULTIPLIER);
   *timeSinceAnimationStart = *timeSinceAnimationStart + 1;
 }
 
-BOOLEAN overlaps(UINT8 location1[], UINT8 sideOffsetX1, UINT8 sideOffsetY1, UINT8 location2[], UINT8 sideOffsetX2, UINT8 sideOffsetY2) {
+BOOLEAN overlaps(UINT8 location1[], UINT8 leftOffset1, UINT8 rightOffset1, UINT8 topOffset1, UINT8 bottomOffset1, UINT8 location2[], UINT8 leftOffset2, UINT8 rightOffset2, UINT8 topOffset2, UINT8 bottomOffset2) {
   // TODO remove, only here for debug purposes.
   UINT8 x1 = location1[0];
   UINT8 x2 = location2[0];
   UINT8 y1 = location1[1];
   UINT8 y2 = location2[1];
-  if (x1 + sideOffsetX1 < x2 + sideOffsetX2 + 8 &&
-    x1 - sideOffsetX1 + 8 > x2 - sideOffsetX2 &&
-    y1 + sideOffsetY1 < y2 + sideOffsetY2 + 8 &&
-    y1 - sideOffsetY1 + 8 > y2 - sideOffsetY2) {
+  if (x1 + leftOffset1 < x2 + rightOffset2 + SPRITE_WIDTH &&
+    x1 - rightOffset1 + SPRITE_WIDTH > x2 - leftOffset2 &&
+    y1 + topOffset1 < y2 - bottomOffset2 + SPRITE_HEIGHT &&
+    y1 - bottomOffset1 + SPRITE_HEIGHT > y2 + topOffset2) {
       return TRUE;
     }
   return FALSE;
@@ -104,7 +120,7 @@ void hideSprite(UINT8 spriteIndex, UINT8 currentLocation[]) {
 }
 
 void updatePlayerBullet(Player *player, Bullet *playerBullet, Enemy *enemy) {
-  if (overlaps(playerBullet->location, playerBullet->spriteWidthOffset, playerBullet->spriteHeightOffset, enemy->location, 0, 0)) {
+  if (overlaps(playerBullet->location, playerBullet->spriteLeftOffset, playerBullet->spriteRightOffset, playerBullet->spriteTopOffset, playerBullet->spriteBottomOffset, enemy->location, enemy->spriteLeftOffset, enemy->spriteRightOffset, enemy->spriteTopOffset, enemy->spriteBottomOffset)) {
     hideSprite(playerBullet->spriteIndex, playerBullet->location);
     score = score + 100;
   }
@@ -127,7 +143,21 @@ void updateWindow() {
   } while (remainingScore > 0);
 }
 
+void drawEnemy(Enemy *enemy) {
+  UINT8 tileOffset = 0;
+  if (!enemy->bottomEnemy) {
+    tileOffset = 3;
+  } else if (!enemy->topEnemy) {
+    tileOffset = 4;
+  }
+  set_sprite_tile(enemy->spriteIndex, ENEMY_TILE_INDEX + tileOffset * TILE_INDEX_MULTIPLIER);
+}
+
 void main() {
+  SPRITES_8x16;
+  SHOW_SPRITES;
+  SHOW_WIN;
+
   font_t min_font;
   font_init();
   min_font = font_load(font_min);
@@ -137,43 +167,47 @@ void main() {
   Player player = {
     .spriteCount = 2,
     .spriteIndex = 0,
+    .location[0] = 76,
+    .location[1] = 140,
     .timeSinceAnimationStart = 0,
     .timeSinceLastMoved = 0,
     .moveSpeedDelay = 0,
     .canMove = TRUE,
-    .location[0] = 76,
-    .location[1] = 140,
+    .canShoot = TRUE,
   };
-  set_sprite_data(0, player.spriteCount, PlayerSprites);
+  set_sprite_data(PLAYER_TILE_INDEX, player.spriteCount * 2, PlayerSprites);
   move_sprite(player.spriteIndex, player.location[0], player.location[1]);
 
   // Create the player bullet instance.
   Bullet playerBullet = {
   .spriteCount = 1,
   .spriteIndex = 1,
-  .speed = 2,
   .location[0] = 0,
   .location[1] = 0,
-  .spriteWidthOffset = 3,
-  .spriteHeightOffset = 0,
+  .speed = 2,
+  .spriteLeftOffset = 3,
+  .spriteRightOffset = 3,
+  .spriteTopOffset = 0,
+  .spriteBottomOffset = 8,
   };
-  set_sprite_data(2, playerBullet.spriteCount, BulletSprites);
-  set_sprite_tile(playerBullet.spriteIndex, 2);
+  set_sprite_data(PLAYER_BULLET_TILE_INDEX, playerBullet.spriteCount * TILE_INDEX_MULTIPLIER, BulletSprites);
+  set_sprite_tile(playerBullet.spriteIndex, PLAYER_BULLET_TILE_INDEX);
 
   // Create an instance of enemy.
   Enemy enemy = {
     .spriteIndex = 2,
-    .spriteWidthOffset = 0,
-    .spriteHeightOffset = 0,
     .location[0] = 30,
     .location[1] = 30,
+    .spriteLeftOffset = 0,
+    .spriteRightOffset = 0,
+    .spriteTopOffset = 0,
+    .spriteBottomOffset = 8,
+    .topEnemy = TRUE,
+    .bottomEnemy = FALSE,
   };
-  set_sprite_data(3, 1, EnemySprites);
-  set_sprite_tile(enemy.spriteIndex, 3);
+  set_sprite_data(ENEMY_TILE_INDEX, 5 * TILE_INDEX_MULTIPLIER, MultipleEnemySprites);
+  set_sprite_tile(enemy.spriteIndex, ENEMY_TILE_INDEX);
   move_sprite(enemy.spriteIndex, enemy.location[0], enemy.location[1]);
-
-  SHOW_SPRITES;
-  SHOW_WIN;
 
   // Game loop.
   while (1) {
@@ -203,6 +237,7 @@ void main() {
     updatePlayerBullet(&player, &playerBullet, &enemy);
     // Animate the player.
     animateSprite(player.spriteIndex, player.spriteCount, 7, &player.timeSinceAnimationStart);
+    drawEnemy(&enemy);
     performantdelay(1);
   }
   
