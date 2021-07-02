@@ -76,8 +76,8 @@ void performantdelay(UINT8 numloops){
     }     
 }
 
-BOOLEAN isOnScreen(UINT8 location[], UINT8 width, UINT8 height) {
-  if (location[1] + height <= 16 || location[1] >= 148 || location[0] + width <= 8 || location[0] >= 174) {
+BOOLEAN isOnScreen(UINT8 location[], INT8 width, INT8 height) {
+  if (location[1] + height <= 16 || location[1] >= 148 || location[0] + width <= 8 || location[0] >= 168) {
     return FALSE;
   }
   return TRUE;
@@ -275,12 +275,16 @@ void main() {
     // Player controls
     if (player.canMove) {
       if (joypad()&J_LEFT) {
-        moveSprite(player.spriteIndex, player.location, -1, 0);
-        player.canMove = FALSE;
+        if (player.location[0] - 1 >= 8) {
+          moveSprite(player.spriteIndex, player.location, -1, 0);
+          player.canMove = FALSE;
+        }
       }
       if (joypad()&J_RIGHT) {
-        moveSprite(player.spriteIndex, player.location, 1, 0);
-        player.canMove = FALSE;
+        if (player.location[0] + SPRITE_WIDTH + 1 <= 168) {
+          moveSprite(player.spriteIndex, player.location, 1, 0);
+          player.canMove = FALSE;
+        }
       }
     }
     if (joypad()&J_A) {
