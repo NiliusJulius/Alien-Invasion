@@ -1,15 +1,15 @@
 /*
 
- ENEMYSPRITES.H
+ EXPLOSION.C
 
- Include File.
+ Tile Source File.
 
  Info:
   Form                 : All tiles as one unit.
   Format               : Gameboy 4 color.
   Compression          : None.
   Counter              : None.
-  Tile size            : 8 x 8
+  Tile size            : 8 x 16
   Tiles                : 0 to 0
 
   Palette colors       : None.
@@ -22,10 +22,13 @@
 
 */
 
-
-/* Bank of tiles. */
-#define EnemySpritesBank 0
 /* Start of tile array. */
-extern unsigned char EnemySprites[];
+unsigned char ExplosionSprite[] =
+{
+  0x42,0x42,0x24,0x24,0x00,0x00,0xC3,0xC3,
+  0x00,0x00,0x24,0x24,0x42,0x42,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+};
 
-/* End of ENEMYSPRITES.H */
+/* End of EXPLOSION.C */
