@@ -22,6 +22,7 @@ typedef struct Bullet {
   UINT8 spriteRightOffset;
   UINT8 spriteTopOffset;
   UINT8 spriteBottomOffset;
+  BOOLEAN moved;
 } Bullet;
 
 typedef struct Enemy {
@@ -33,8 +34,8 @@ typedef struct Enemy {
   UINT8 spriteBottomOffset;
   BOOLEAN topEnemy;
   BOOLEAN bottomEnemy;
-  BOOLEAN bottomShot;
-  BOOLEAN topShot;
+  BOOLEAN destroyed;
+  BOOLEAN requiresUpdate;
 } Enemy;
 
 typedef struct Explosion {
