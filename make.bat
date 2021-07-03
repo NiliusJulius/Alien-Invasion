@@ -6,9 +6,4 @@ D:\gbdk\bin\lcc -Wa-l -Wl-m -Wf--debug -Wf--nolospre -Wl-y -Wl-w -c -o build\Win
 D:\gbdk\bin\lcc -Wa-l -Wl-m -Wf--debug -Wf--nolospre -Wl-y -Wl-w -c -o build\main.o main.c
 D:\gbdk\bin\lcc -Wa-l -Wl-m -Wf--debug -Wf--nolospre -Wl-y -Wl-j -Wl-w -o build\main.gb build\main.o build\PlayerSprites.o build\BulletSprites.o build\Explosion.o build\MultipleEnemySprites.o build\WindowMap.o
 
-del "%~dp0\build\*.sym" /f /q
-del "%~dp0\build\*.lst" /f /q
-del "%~dp0\build\*.asm" /f /q
-del "%~dp0\build\*.adb" /f /q
-del "%~dp0\build\*.ihx" /f /q
-@REM del "%~dp0\build\*.map" /f /q
+del "%~dp0\build\*.sym" "%~dp0\build\*.lst" "%~dp0\build\*.asm" "%~dp0\build\*.adb" "%~dp0\build\*.ihx" /f /q

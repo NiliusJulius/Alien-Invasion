@@ -1,6 +1,7 @@
 #include <gb/gb.h>
 #include <gb/font.h>
 #include <stdio.h>
+#include "typedefs.c"
 #include "sprites\PlayerSprites.h"
 #include "sprites\BulletSprites.h"
 #include "sprites\Explosion.h"
@@ -19,49 +20,6 @@
 #define TILE_INDEX_MULTIPLIER 2
 
 UINT16 score = 0;
-
-// Player
-typedef struct Player {
-  UINT8 spriteCount;
-  UINT8 spriteIndex;
-  UINT8 location[2];
-  UINT8 timeSinceAnimationStart;
-  UINT8 timeSinceLastMoved;
-  UINT8 moveSpeedDelay;
-  BOOLEAN canMove;
-  BOOLEAN canShoot;
-} Player;
-
-// Player bullet
-typedef struct Bullet {
-  UINT8 spriteCount;
-  UINT8 spriteIndex;
-  UINT8 location[2];
-  UINT8 speed;
-  UINT8 spriteLeftOffset;
-  UINT8 spriteRightOffset;
-  UINT8 spriteTopOffset;
-  UINT8 spriteBottomOffset;
-} Bullet;
-
-typedef struct Enemy {
-  UINT8 spriteIndex;
-  UINT8 location[2];
-  UINT8 spriteLeftOffset;
-  UINT8 spriteRightOffset;
-  UINT8 spriteTopOffset;
-  UINT8 spriteBottomOffset;
-  BOOLEAN topEnemy;
-  BOOLEAN bottomEnemy;
-  BOOLEAN bottomShot;
-  BOOLEAN topShot;
-} Enemy;
-
-typedef struct Explosion {
-  UINT8 spriteIndex;
-  UINT8 location[2];
-  UINT8 timeSinceAnimationStart;
-} Explosion;
 
 Player player;
 Bullet playerBullet;
