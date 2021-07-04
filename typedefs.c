@@ -22,7 +22,6 @@ typedef struct Bullet {
   UINT8 spriteRightOffset;
   UINT8 spriteTopOffset;
   UINT8 spriteBottomOffset;
-  BOOLEAN moved;
 } Bullet;
 
 typedef struct Enemy {
