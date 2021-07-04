@@ -38,13 +38,6 @@ void performantdelay(UINT8 numloops){
     }     
 }
 
-BOOLEAN isOnScreen(UINT8 location[], INT8 width, INT8 height) {
-  if (location[1] + height <= 16 || location[1] >= 148 || location[0] + width <= 8 || location[0] >= 168) {
-    return FALSE;
-  }
-  return TRUE;
-}
-
 void animatePlayer() {
   UINT8 currentFrame;
   if (player.timeSinceAnimationStart >= player.spriteCount * PLAYER_ANIM_SPEED) {
@@ -61,11 +54,12 @@ void animatePlayer() {
 }
 
 void updateExplosion() {
-  if (isOnScreen(explosion.location, SPRITE_WIDTH, SPRITE_HEIGHT / 2)) {
+  if (explosion.isOnScreen) {
     if (explosion.timeSinceAnimationStart >= 6) {
       explosion.location[0] = 0;
       explosion.location[1] = 0;
       move_sprite(explosion.spriteIndex, explosion.location[0], explosion.location[1]);
+      explosion.isOnScreen = FALSE;
     }
     explosion.timeSinceAnimationStart = explosion.timeSinceAnimationStart + 1;
   }
@@ -78,18 +72,6 @@ void updatePlayer() {
   } else if (!player.canMove) {
     player.timeSinceLastMoved++;
   }
-}
-
-// void moveSprite(UINT8 spriteIndex, UINT8 currentLocation[], INT8 xChange, INT8 yChange) {
-//   currentLocation[0] = currentLocation[0] + xChange;
-//   currentLocation[1] = currentLocation[1] + yChange;
-//   move_sprite(spriteIndex, currentLocation[0], currentLocation[1]);
-// }
-
-void hideSprite(UINT8 spriteIndex, UINT8 currentLocation[]) {
-  currentLocation[0] = 0;
-  currentLocation[1] = 0;
-  move_sprite(spriteIndex, currentLocation[0], currentLocation[1]);
 }
 
 void enemyHit(Enemy *enemy) {
@@ -110,24 +92,11 @@ void enemyHit(Enemy *enemy) {
 
   enemy->requiresUpdate = TRUE;
   move_sprite(explosion.spriteIndex, explosion.location[0], explosion.location[1]);
+  explosion.isOnScreen = TRUE;
 }
 
 void updatePlayerBullet() {
   if (playerBullet.location[1] + SPRITE_HEIGHT > 16 && playerBullet.location[1] < 160) {
-    // if (!enemy->destroyed && playerBullet.location[1] <= enemy->location[1] + SPRITE_HEIGHT) {
-    //   if (playerBullet.location[0] + playerBullet.spriteLeftOffset < enemy->location[0] + enemy->spriteRightOffset + SPRITE_WIDTH &&
-    //         playerBullet.location[0] - playerBullet.spriteRightOffset + SPRITE_WIDTH > enemy->location[0] - enemy->spriteLeftOffset &&
-    //         playerBullet.location[1] + playerBullet.spriteTopOffset < enemy->location[1] - enemy->spriteBottomOffset + SPRITE_HEIGHT &&
-    //         playerBullet.location[1] - playerBullet.spriteBottomOffset + SPRITE_HEIGHT > enemy->location[1] + enemy->spriteTopOffset
-    //   ) {
-    //     enemyHit(enemy);
-    //     hideSprite(playerBullet.spriteIndex, playerBullet.location);
-    //     score = score + 100;
-    //   }
-    // }
-
-      // moveSprite(playerBullet.spriteIndex, playerBullet.location, 0, -1 * playerBullet.speed);
-      // UINT8 y = playerBullet.location[1];
     playerBullet.location[1] = playerBullet.location[1] - 1 * playerBullet.speed;
     move_sprite(playerBullet.spriteIndex, playerBullet.location[0], playerBullet.location[1]);
   } else {
@@ -144,7 +113,9 @@ void updateEnemies() {
             playerBullet.location[1] - playerBullet.spriteBottomOffset + SPRITE_HEIGHT > enemy->location[1] + enemy->spriteTopOffset
     ) {
       enemyHit(enemy);
-      hideSprite(playerBullet.spriteIndex, playerBullet.location);
+      playerBullet.location[0] = 0;
+      playerBullet.location[1] = 1;
+      move_sprite(playerBullet.spriteIndex, playerBullet.location[0], playerBullet.location[1]);
       score = score + 100;
     }
     if (!enemy->destroyed && enemy->requiresUpdate) {
@@ -181,44 +152,47 @@ void updateWindow() {
 }
 
 void createEnemies() {
+  Enemy *enemy = enemies;
   for (UINT8 i=0; i<ENEMY_ARRAY_LENGTH; i++) {
     switch (enemyGroup1[i])
     {
     case 1:
-      enemies[i].spriteTopOffset = 0;
-      enemies[i].spriteBottomOffset = 0;
-      enemies[i].spriteLeftOffset = 0;
-      enemies[i].spriteRightOffset = 0;
-      enemies[i].topEnemy = TRUE;
-      enemies[i].bottomEnemy = TRUE;
+      enemy->spriteTopOffset = 0;
+      enemy->spriteBottomOffset = 0;
+      enemy->spriteLeftOffset = 0;
+      enemy->spriteRightOffset = 0;
+      enemy->topEnemy = TRUE;
+      enemy->bottomEnemy = TRUE;
       break;
     case 2:
-      enemies[i].spriteTopOffset = 0;
-      enemies[i].spriteBottomOffset = SPRITE_HEIGHT / 2;
-      enemies[i].spriteLeftOffset = 0;
-      enemies[i].spriteRightOffset = 0;
-      enemies[i].topEnemy = TRUE;
-      enemies[i].bottomEnemy = FALSE;
+      enemy->spriteTopOffset = 0;
+      enemy->spriteBottomOffset = SPRITE_HEIGHT / 2;
+      enemy->spriteLeftOffset = 0;
+      enemy->spriteRightOffset = 0;
+      enemy->topEnemy = TRUE;
+      enemy->bottomEnemy = FALSE;
       break;
     case 3:
-      enemies[i].spriteTopOffset = SPRITE_HEIGHT / 2;
-      enemies[i].spriteBottomOffset = 0;
-      enemies[i].spriteLeftOffset = 0;
-      enemies[i].spriteRightOffset = 0;
-      enemies[i].topEnemy = FALSE;
-      enemies[i].bottomEnemy = TRUE;
+      enemy->spriteTopOffset = SPRITE_HEIGHT / 2;
+      enemy->spriteBottomOffset = 0;
+      enemy->spriteLeftOffset = 0;
+      enemy->spriteRightOffset = 0;
+      enemy->topEnemy = FALSE;
+      enemy->bottomEnemy = TRUE;
       break;    
     default:
       break;
     }
     
-    enemies[i].spriteIndex = 15 + i;
-    enemies[i].location[0] = 20 + SPRITE_WIDTH * 2 * (i % 8);
-    enemies[i].location[1] = 30 + SPRITE_HEIGHT * (i / 8);
-    enemies[i].requiresUpdate = FALSE;
-    enemies[i].destroyed = FALSE;
-    set_sprite_tile(enemies[i].spriteIndex, ENEMY_MULTI_TILE_INDEX);
-    move_sprite(enemies[i].spriteIndex, enemies[i].location[0], enemies[i].location[1]);
+    enemy->spriteIndex = 15 + i;
+    enemy->location[0] = 24 + SPRITE_WIDTH * 2 * (i % 8);
+    enemy->location[1] = 30 + SPRITE_HEIGHT * (i / 8);
+    enemy->requiresUpdate = FALSE;
+    enemy->destroyed = FALSE;
+    set_sprite_tile(enemy->spriteIndex, ENEMY_MULTI_TILE_INDEX);
+    move_sprite(enemy->spriteIndex, enemy->location[0], enemy->location[1]);
+
+    enemy++;
   }
 }
 
@@ -269,6 +243,7 @@ void main() {
   explosion.spriteIndex = 39;
   explosion.location[0] = 0;
   explosion.location[1] = 0;
+  explosion.isOnScreen = FALSE;
   // Set explostion sprite data.
   set_sprite_data(EXPLOSION_TILE_INDEX, 1 * TILE_INDEX_MULTIPLIER, ExplosionSprite);
   set_sprite_tile(explosion.spriteIndex, EXPLOSION_TILE_INDEX);

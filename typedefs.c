@@ -41,4 +41,5 @@ typedef struct Explosion {
   UINT8 spriteIndex;
   UINT8 location[2];
   UINT8 timeSinceAnimationStart;
+  UINT8 isOnScreen;
 } Explosion;
