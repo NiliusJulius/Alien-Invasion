@@ -34,7 +34,6 @@ typedef struct Enemy {
   BOOLEAN topEnemy;
   BOOLEAN bottomEnemy;
   BOOLEAN destroyed;
-  BOOLEAN requiresUpdate;
 } Enemy;
 
 typedef struct Explosion {

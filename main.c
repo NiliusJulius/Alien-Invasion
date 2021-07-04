@@ -10,7 +10,7 @@
 #include "maps\WindowMap.h"
 
 #define PLAYER_TILE_INDEX 0
-#define PLAYER_ANIM_SPEED 7
+#define PLAYER_ANIM_SPEED 14
 
 #define PLAYER_BULLET_TILE_INDEX 4
 #define EXPLOSION_TILE_INDEX 6
@@ -18,6 +18,7 @@
 
 #define SPRITE_WIDTH 8
 #define SPRITE_HEIGHT 16
+#define HALF_SPRITE_HEIGHT SPRITE_HEIGHT / 2
 
 // Because we are running in 8x16 sprite mode, all tile indexes should be multiplied by 2.
 #define TILE_INDEX_MULTIPLIER 2
@@ -74,27 +75,6 @@ void updatePlayer() {
   }
 }
 
-void enemyHit(Enemy *enemy) {
-  explosion.timeSinceAnimationStart = 0;
-  explosion.location[0] = enemy->location[0];
-
-  // Top enemy hit.
-  if (playerBullet.location[1] + playerBullet.spriteTopOffset <= enemy->location[1] + (SPRITE_HEIGHT / 2)) {
-    enemy->topEnemy = FALSE;
-    explosion.location[1] = enemy->location[1];
-    enemy->spriteTopOffset = 8;
-  } else {
-    // Bottom enemy hit.
-    enemy->bottomEnemy = FALSE;
-    explosion.location[1] = enemy->location[1] + (SPRITE_HEIGHT / 2);
-    enemy->spriteBottomOffset = 8;
-  }
-
-  enemy->requiresUpdate = TRUE;
-  move_sprite(explosion.spriteIndex, explosion.location[0], explosion.location[1]);
-  explosion.isOnScreen = TRUE;
-}
-
 void updatePlayerBullet() {
   if (playerBullet.location[1] + SPRITE_HEIGHT > 16 && playerBullet.location[1] < 160) {
     playerBullet.location[1] = playerBullet.location[1] - 1 * playerBullet.speed;
@@ -105,38 +85,66 @@ void updatePlayerBullet() {
 }
 
 void updateEnemies() {
-  Enemy *enemy = enemies;
   for (UINT8 i=0; i<ENEMY_ARRAY_LENGTH; i++) {
-    if (playerBullet.location[0] + playerBullet.spriteLeftOffset < enemy->location[0] + enemy->spriteRightOffset + SPRITE_WIDTH &&
-            playerBullet.location[0] - playerBullet.spriteRightOffset + SPRITE_WIDTH > enemy->location[0] - enemy->spriteLeftOffset &&
-            playerBullet.location[1] + playerBullet.spriteTopOffset < enemy->location[1] - enemy->spriteBottomOffset + SPRITE_HEIGHT &&
-            playerBullet.location[1] - playerBullet.spriteBottomOffset + SPRITE_HEIGHT > enemy->location[1] + enemy->spriteTopOffset
-    ) {
-      enemyHit(enemy);
-      playerBullet.location[0] = 0;
-      playerBullet.location[1] = 1;
-      move_sprite(playerBullet.spriteIndex, playerBullet.location[0], playerBullet.location[1]);
-      score = score + 100;
-    }
-    if (!enemy->destroyed && enemy->requiresUpdate) {
-      UINT8 tileOffset = 0;
-      if (!enemy->bottomEnemy && enemy->topEnemy) {
-        // Only the top enemy is left.
-        tileOffset = 1;
-      } else if (!enemy->topEnemy && enemy->bottomEnemy) {
-        // Only the bottom enemy is left.
-        tileOffset = 2;
-      } else if (!enemy->topEnemy && !enemy->bottomEnemy) {
-        // Both enemies have been destroyed.
-        enemy->location[0] = 0;
-        enemy->location[1] = 0;
-        enemy->destroyed = TRUE;
+    // Already destroyed enemies don't need updating.
+    if (!enemies[i].destroyed) {
+      // Check whether the enemy is being hit by the player's bullet.
+      if (playerBullet.location[0] + playerBullet.spriteLeftOffset < enemies[i].location[0] + enemies[i].spriteRightOffset + SPRITE_WIDTH &&
+              playerBullet.location[0] - playerBullet.spriteRightOffset + SPRITE_WIDTH > enemies[i].location[0] - enemies[i].spriteLeftOffset &&
+              playerBullet.location[1] + playerBullet.spriteTopOffset < enemies[i].location[1] - enemies[i].spriteBottomOffset + SPRITE_HEIGHT &&
+              playerBullet.location[1] - playerBullet.spriteBottomOffset + SPRITE_HEIGHT > enemies[i].location[1] + enemies[i].spriteTopOffset
+      ) {
+        // Set the explosion x location first, since we will move the destroyed enemies.
+        explosion.location[0] = enemies[i].location[0];
+
+        // Top enemy hit.
+        if (playerBullet.location[1] + playerBullet.spriteTopOffset <= enemies[i].location[1] + HALF_SPRITE_HEIGHT) {
+          // If the bottom enemy still exists, we update to only show that one.
+          if (enemies[i].bottomEnemy) {
+            enemies[i].topEnemy = FALSE;
+            explosion.location[1] = enemies[i].location[1];
+            enemies[i].spriteTopOffset = 8;
+            set_sprite_tile(enemies[i].spriteIndex, ENEMY_MULTI_TILE_INDEX + 4);
+          } else {
+            // Enemy is totally destroyed.
+            enemies[i].destroyed = TRUE;
+            explosion.location[1] = enemies[i].location[1];
+            enemies[i].location[0] = 0;
+            enemies[i].location[1] = 0;
+            move_sprite(enemies[i].spriteIndex, 0, 0);
+          }
+        } else {
+          // Bottom enemy hit.
+          // If the top enemy still exists, we update to only show that one.
+          if (enemies[i].topEnemy) {
+            enemies[i].bottomEnemy = FALSE;
+            explosion.location[1] = enemies[i].location[1] + HALF_SPRITE_HEIGHT;
+            enemies[i].spriteBottomOffset = 8;
+            set_sprite_tile(enemies[i].spriteIndex, ENEMY_MULTI_TILE_INDEX + 2);
+          } else {
+            // Enemy is totally destroyed.
+            enemies[i].destroyed = TRUE;
+            explosion.location[1] = enemies[i].location[1];
+            enemies[i].location[0] = 0;
+            enemies[i].location[1] = 0;
+            move_sprite(enemies[i].spriteIndex, 0, 0);
+          }
+        }
+
+        // Update the explosion to show on the enemies location.
+        explosion.timeSinceAnimationStart = 0;
+        move_sprite(explosion.spriteIndex, explosion.location[0], explosion.location[1]);
+        explosion.isOnScreen = TRUE;
+
+        // Destroy the player's bullet.
+        playerBullet.location[0] = 0;
+        playerBullet.location[1] = 1;
+        move_sprite(playerBullet.spriteIndex, playerBullet.location[0], playerBullet.location[1]);
+
+        // Update the score.
+        score = score + 100;
       }
-      set_sprite_tile(enemy->spriteIndex, ENEMY_MULTI_TILE_INDEX + tileOffset * TILE_INDEX_MULTIPLIER);
-      move_sprite(enemy->spriteIndex, enemy->location[0], enemy->location[1]);
-      enemy->requiresUpdate = FALSE;
     }
-    enemy++;
   }
 }
 
@@ -166,14 +174,14 @@ void createEnemies() {
       break;
     case 2:
       enemy->spriteTopOffset = 0;
-      enemy->spriteBottomOffset = SPRITE_HEIGHT / 2;
+      enemy->spriteBottomOffset = HALF_SPRITE_HEIGHT;
       enemy->spriteLeftOffset = 0;
       enemy->spriteRightOffset = 0;
       enemy->topEnemy = TRUE;
       enemy->bottomEnemy = FALSE;
       break;
     case 3:
-      enemy->spriteTopOffset = SPRITE_HEIGHT / 2;
+      enemy->spriteTopOffset = HALF_SPRITE_HEIGHT;
       enemy->spriteBottomOffset = 0;
       enemy->spriteLeftOffset = 0;
       enemy->spriteRightOffset = 0;
@@ -187,7 +195,6 @@ void createEnemies() {
     enemy->spriteIndex = 15 + i;
     enemy->location[0] = 24 + SPRITE_WIDTH * 2 * (i % 8);
     enemy->location[1] = 30 + SPRITE_HEIGHT * (i / 8);
-    enemy->requiresUpdate = FALSE;
     enemy->destroyed = FALSE;
     set_sprite_tile(enemy->spriteIndex, ENEMY_MULTI_TILE_INDEX);
     move_sprite(enemy->spriteIndex, enemy->location[0], enemy->location[1]);
@@ -280,12 +287,13 @@ void main() {
     // Update everything for the player.
     updatePlayer();
     animatePlayer();
-    updatePlayerBullet();
 
     // Update everything with enemies.
     updateEnemies();
 
     updateExplosion();
+    
+    updatePlayerBullet();
     
     updateWindow();
 
