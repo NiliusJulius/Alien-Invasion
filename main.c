@@ -1,6 +1,7 @@
 #include <gb/gb.h>
 #include <gb/font.h>
 #include <stdio.h>
+#include "bcd.h"
 #include "typedefs.c"
 #include "enemygroups.c"
 #include "sprites\PlayerSprites.h"
@@ -25,7 +26,7 @@
 
 #define ENEMY_ARRAY_LENGTH 24
 
-UINT16 score = 0;
+BCD score = MAKE_BCD(0);
 
 Player player;
 Bullet playerBullet;
@@ -140,21 +141,16 @@ void updateEnemies() {
         move_sprite(playerBullet.spriteIndex, playerBullet.location[0], playerBullet.location[1]);
 
         // Update the score.
-        score = score + 100;
+        bcd_add(&score, &enemies[i].value);
       }
     }
   }
 }
 
 void updateWindow() {
-  UINT16 remainingScore = score;
-  UINT8 digitsDrawn = 0;
-  do {
-    UINT8 digit = remainingScore % 10 + 1;
-    set_win_tiles(19 - digitsDrawn, 17, 1, 1, &digit);
-    digitsDrawn++;
-    remainingScore = remainingScore / 10;
-  } while (remainingScore > 0);
+  unsigned char buffer[9];
+  bcd2text(&score, 0x01, buffer);
+  set_win_tiles(6, 0, 8, 1, buffer);
 }
 
 void createEnemies() {
@@ -164,6 +160,7 @@ void createEnemies() {
     enemy->location[0] = 24 + SPRITE_WIDTH * 2 * (i % 8);
     enemy->location[1] = 30 + SPRITE_HEIGHT * (i / 8);
     enemy->destroyed = FALSE;
+    enemy->value = MAKE_BCD(100);
     move_sprite(enemy->spriteIndex, enemy->location[0], enemy->location[1]);
 
     switch (enemyGroup1[i])
@@ -207,6 +204,10 @@ void main() {
   SPRITES_8x16;
   SHOW_SPRITES;
   SHOW_WIN;
+
+  // Create the score text
+  unsigned char scoreText[] = {0x1D, 0xD, 0x19, 0x1C, 0xF};
+  set_win_tiles(0, 0, 5, 1, scoreText);
 
   font_t min_font;
   font_init();

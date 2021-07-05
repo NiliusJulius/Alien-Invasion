@@ -34,6 +34,7 @@ typedef struct Enemy {
   BOOLEAN topEnemy;
   BOOLEAN bottomEnemy;
   BOOLEAN destroyed;
+  BCD value;
 } Enemy;
 
 typedef struct Explosion {
