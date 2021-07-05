@@ -98,33 +98,31 @@ void updateEnemies() {
         explosion.location[0] = enemies[i].location[0];
 
         // Top enemy hit.
-        if (playerBullet.location[1] + playerBullet.spriteTopOffset <= enemies[i].location[1] + HALF_SPRITE_HEIGHT) {
+        if ((playerBullet.location[1] + playerBullet.spriteTopOffset <= enemies[i].location[1] + HALF_SPRITE_HEIGHT)) {
+          explosion.location[1] = enemies[i].location[1];
           // If the bottom enemy still exists, we update to only show that one.
           if (enemies[i].bottomEnemy) {
             enemies[i].topEnemy = FALSE;
-            explosion.location[1] = enemies[i].location[1];
             enemies[i].spriteTopOffset = 8;
             set_sprite_tile(enemies[i].spriteIndex, ENEMY_MULTI_TILE_INDEX + 4);
           } else {
             // Enemy is totally destroyed.
             enemies[i].destroyed = TRUE;
-            explosion.location[1] = enemies[i].location[1];
             enemies[i].location[0] = 0;
             enemies[i].location[1] = 0;
             move_sprite(enemies[i].spriteIndex, 0, 0);
           }
         } else {
           // Bottom enemy hit.
+          explosion.location[1] = enemies[i].location[1] + HALF_SPRITE_HEIGHT;
           // If the top enemy still exists, we update to only show that one.
           if (enemies[i].topEnemy) {
             enemies[i].bottomEnemy = FALSE;
-            explosion.location[1] = enemies[i].location[1] + HALF_SPRITE_HEIGHT;
-            enemies[i].spriteBottomOffset = 8;
+            enemies[i].spriteBottomOffset = 1 + 8;
             set_sprite_tile(enemies[i].spriteIndex, ENEMY_MULTI_TILE_INDEX + 2);
           } else {
             // Enemy is totally destroyed.
             enemies[i].destroyed = TRUE;
-            explosion.location[1] = enemies[i].location[1];
             enemies[i].location[0] = 0;
             enemies[i].location[1] = 0;
             move_sprite(enemies[i].spriteIndex, 0, 0);
@@ -162,42 +160,44 @@ void updateWindow() {
 void createEnemies() {
   Enemy *enemy = enemies;
   for (UINT8 i=0; i<ENEMY_ARRAY_LENGTH; i++) {
-    switch (enemyGroup1[i])
-    {
-    case 1:
-      enemy->spriteTopOffset = 0;
-      enemy->spriteBottomOffset = 0;
-      enemy->spriteLeftOffset = 0;
-      enemy->spriteRightOffset = 0;
-      enemy->topEnemy = TRUE;
-      enemy->bottomEnemy = TRUE;
-      break;
-    case 2:
-      enemy->spriteTopOffset = 0;
-      enemy->spriteBottomOffset = HALF_SPRITE_HEIGHT;
-      enemy->spriteLeftOffset = 0;
-      enemy->spriteRightOffset = 0;
-      enemy->topEnemy = TRUE;
-      enemy->bottomEnemy = FALSE;
-      break;
-    case 3:
-      enemy->spriteTopOffset = HALF_SPRITE_HEIGHT;
-      enemy->spriteBottomOffset = 0;
-      enemy->spriteLeftOffset = 0;
-      enemy->spriteRightOffset = 0;
-      enemy->topEnemy = FALSE;
-      enemy->bottomEnemy = TRUE;
-      break;    
-    default:
-      break;
-    }
-    
     enemy->spriteIndex = 15 + i;
     enemy->location[0] = 24 + SPRITE_WIDTH * 2 * (i % 8);
     enemy->location[1] = 30 + SPRITE_HEIGHT * (i / 8);
     enemy->destroyed = FALSE;
-    set_sprite_tile(enemy->spriteIndex, ENEMY_MULTI_TILE_INDEX);
     move_sprite(enemy->spriteIndex, enemy->location[0], enemy->location[1]);
+
+    switch (enemyGroup1[i])
+    {
+    case 1:
+      enemy->spriteTopOffset = 0;
+      enemy->spriteBottomOffset = 1;
+      enemy->spriteLeftOffset = 0;
+      enemy->spriteRightOffset = 0;
+      enemy->topEnemy = TRUE;
+      enemy->bottomEnemy = TRUE;
+      set_sprite_tile(enemy->spriteIndex, ENEMY_MULTI_TILE_INDEX);
+      break;
+    case 2:
+      enemy->spriteTopOffset = 0;
+      enemy->spriteBottomOffset = 1 + HALF_SPRITE_HEIGHT;
+      enemy->spriteLeftOffset = 0;
+      enemy->spriteRightOffset = 0;
+      enemy->topEnemy = TRUE;
+      enemy->bottomEnemy = FALSE;
+      set_sprite_tile(enemy->spriteIndex, ENEMY_MULTI_TILE_INDEX + 2);
+      break;
+    case 3:
+      enemy->spriteTopOffset = HALF_SPRITE_HEIGHT;
+      enemy->spriteBottomOffset = 1;
+      enemy->spriteLeftOffset = 0;
+      enemy->spriteRightOffset = 0;
+      enemy->topEnemy = FALSE;
+      enemy->bottomEnemy = TRUE;
+      set_sprite_tile(enemy->spriteIndex, ENEMY_MULTI_TILE_INDEX + 4);
+      break;    
+    default:
+      break;
+    }
 
     enemy++;
   }
