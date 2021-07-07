@@ -21,13 +21,13 @@ const unsigned char soundExplosion[][5] =
   {0x01,0x3F,0xF2,0x04,0x80}
 };
 
-UINT8 sound_cnt_ch1;
-UINT8 sound_typ_ch1;
+uint8_t sound_cnt_ch1;
+uint8_t sound_typ_ch1;
 
-UINT8 sound_cnt_ch4;
-UINT8 sound_typ_ch4;
+uint8_t sound_cnt_ch4;
+uint8_t sound_typ_ch4;
 
-void set_sound(UINT8 sound) {
+void set_sound(uint8_t sound) {
 	switch (sound) {
 		case SOUND_PLAYER_SHOOT:
       sound_cnt_ch1 = (sizeof(soundPlayerShoot)) / 6;

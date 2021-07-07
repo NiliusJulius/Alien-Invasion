@@ -1,6 +1,6 @@
 /*
 
- BULLETSPRITES.H
+ EXPLOSION.H
 
  Include File.
 
@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 16
-  Tiles                : 0 to 1
+  Tiles                : 0 to 0
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -24,8 +24,8 @@
 
 
 /* Bank of tiles. */
-#define BulletSpritesBank 0
+#define ExplosionSpriteBank 0
 /* Start of tile array. */
-extern unsigned char BulletSprites[];
+extern unsigned char explosion_sprites[];
 
-/* End of BULLETSPRITES.H */
+/* End of EXPLOSION.H */

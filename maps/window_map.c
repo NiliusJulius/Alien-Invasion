@@ -1,4 +1,4 @@
-unsigned char WindowMap[] =
+unsigned char window_map[] =
 {
   0x01,0x02,0x03,0x04,0x05
 };

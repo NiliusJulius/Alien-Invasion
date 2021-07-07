@@ -16,7 +16,7 @@ enum notes
 	BRK
 };
 
-const UINT16 frequency[] =
+const uint16_t frequency[] =
 { 
 	44, 156, 262, 363, 457, 547, 631, 710, 786, 854, 923, 986,
 	1046, 1102, 1155, 1205, 1253, 1297, 1339, 1379, 1417, 1452, 1486, 1517,
@@ -56,41 +56,41 @@ volatile unsigned char __at (0xFF30) wave[16];
 #endif
 
 
-UINT8 music_play;
+uint8_t music_play;
 
 const unsigned char *music_data_ch1;
 const unsigned char *music_ptr_ch1;
-UINT8 music_cnt_ch1;
-UINT8 inst_ch1;
-UINT8 vol_ch1;
+uint8_t music_cnt_ch1;
+uint8_t inst_ch1;
+uint8_t vol_ch1;
 
 const unsigned char *music_data_ch2;
 const unsigned char *music_ptr_ch2;
-UINT8 music_cnt_ch2;
-UINT8 inst_ch2;
-UINT8 vol_ch2;
+uint8_t music_cnt_ch2;
+uint8_t inst_ch2;
+uint8_t vol_ch2;
 
 const unsigned char *music_data_ch3;
 const unsigned char *music_ptr_ch3;
-UINT8 music_cnt_ch3;
+uint8_t music_cnt_ch3;
 
 const unsigned char *music_data_ch4;
 const unsigned char *music_ptr_ch4;
-UINT8 music_cnt_ch4;
+uint8_t music_cnt_ch4;
 
 void init_sound() {	
 	NR52_REG = 0x80;
   NR50_REG = 0x77;
   NR51_REG = 0xFF;
 	
-	for (UINT8 i = 0; i != 16; i++) {
+	for (uint8_t i = 0; i != 16; i++) {
     #ifndef __INTELLISENSE__ //
 		wave[i] = inst_ch3[i];
     #endif
 	}
 }
 
-void set_music(UINT8 song) {
+void set_music(uint8_t song) {
 	music_play = TRUE;
 		
 	switch (song) {
@@ -119,8 +119,8 @@ void set_music(UINT8 song) {
 }
 
 void play_music() {
-	UINT16 freq;
-	UINT8 cwd;
+	uint16_t freq;
+	uint8_t cwd;
 	
 	if (music_play == TRUE) {
 		// Channel 1

@@ -1,6 +1,6 @@
 /*
 
- MULTIPLEENEMYSPRITES.H
+ PLAYERSPRITES.H
 
  Include File.
 
@@ -9,7 +9,7 @@
   Format               : Gameboy 4 color.
   Compression          : None.
   Counter              : None.
-  Tile size            : 8 x 16
+  Tile size            : 8 x 8
   Tiles                : 0 to 3
 
   Palette colors       : None.
@@ -24,8 +24,8 @@
 
 
 /* Bank of tiles. */
-#define MultipleEnemySpritesBank 0
+#define PlayerSpritesBank 0
 /* Start of tile array. */
-extern unsigned char MultipleEnemySprites[];
+extern unsigned char player_sprites[];
 
-/* End of MULTIPLEENEMYSPRITES.H */
+/* End of PLAYERSPRITES.H */

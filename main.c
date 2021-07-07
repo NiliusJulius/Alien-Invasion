@@ -3,14 +3,14 @@
 #include <stdio.h>
 #include "bcd.h"
 #include "typedefs.c"
-#include "enemygroups.c"
+#include "enemy_groups.c"
 #include "music.h"
 #include "sound.h"
-#include "sprites\PlayerSprites.h"
-#include "sprites\BulletSprites.h"
-#include "sprites\Explosion.h"
-#include "sprites\MultipleEnemySprites.h"
-#include "maps\WindowMap.h"
+#include "sprites\player_sprites.h"
+#include "sprites\bullet_sprites.h"
+#include "sprites\explosion_sprites.h"
+#include "sprites\multiple_enemy_sprites.h"
+#include "maps\window_map.h"
 
 #define PLAYER_TILE_INDEX 0
 #define PLAYER_ANIM_SPEED 14
@@ -30,72 +30,72 @@
 
 BCD score = MAKE_BCD(0);
 
-Player player;
-Bullet playerBullet;
-Enemy enemies[ENEMY_ARRAY_LENGTH];
-Explosion explosion;
+player_t player;
+bullet_t player_bullet;
+enemy_t enemies[ENEMY_ARRAY_LENGTH];
+explosion_t explosion;
 
-void performantdelay(UINT8 numloops){
-    UINT8 i;
-    for(i = 0; i < numloops; i++){
+void performant_delay(uint8_t num_loops){
+    uint8_t i;
+    for(i = 0; i < num_loops; i++){
         wait_vbl_done();
     }     
 }
 
-void animatePlayer() {
-  UINT8 currentFrame;
-  if (player.timeSinceAnimationStart >= player.spriteCount * PLAYER_ANIM_SPEED) {
+void animate_player() {
+  uint8_t current_frame;
+  if (player.time_since_animation_start >= player.sprite_count * PLAYER_ANIM_SPEED) {
     // If we passed the last frame time, reset the timer.
-    player.timeSinceAnimationStart = 0;
-    currentFrame = 0;
+    player.time_since_animation_start = 0;
+    current_frame = 0;
   } else {
     // else find the frame we should be at.
-    currentFrame = player.timeSinceAnimationStart / PLAYER_ANIM_SPEED;
+    current_frame = player.time_since_animation_start / PLAYER_ANIM_SPEED;
   }
 
-  set_sprite_tile(player.spriteIndex, currentFrame * TILE_INDEX_MULTIPLIER);
-  player.timeSinceAnimationStart = player.timeSinceAnimationStart + 1;
+  set_sprite_tile(player.sprite_index, current_frame * TILE_INDEX_MULTIPLIER);
+  player.time_since_animation_start = player.time_since_animation_start + 1;
 }
 
-void updateExplosion() {
-  if (explosion.isOnScreen) {
-    if (explosion.timeSinceAnimationStart >= 6) {
+void update_explosion() {
+  if (explosion.is_on_screen) {
+    if (explosion.time_since_animation_start >= 6) {
       explosion.location[0] = 0;
       explosion.location[1] = 0;
-      move_sprite(explosion.spriteIndex, explosion.location[0], explosion.location[1]);
-      explosion.isOnScreen = FALSE;
+      move_sprite(explosion.sprite_index, explosion.location[0], explosion.location[1]);
+      explosion.is_on_screen = FALSE;
     }
-    explosion.timeSinceAnimationStart = explosion.timeSinceAnimationStart + 1;
+    explosion.time_since_animation_start = explosion.time_since_animation_start + 1;
   }
 }
 
-void updatePlayer() {
-  if (player.timeSinceLastMoved >= player.moveSpeedDelay) {
-    player.canMove = TRUE;
-    player.timeSinceLastMoved = 0;
-  } else if (!player.canMove) {
-    player.timeSinceLastMoved++;
+void update_player() {
+  if (player.time_since_last_moved >= player.move_speed_delay) {
+    player.can_move = TRUE;
+    player.time_since_last_moved = 0;
+  } else if (!player.can_move) {
+    player.time_since_last_moved++;
   }
 }
 
-void updatePlayerBullet() {
-  if (playerBullet.location[1] + SPRITE_HEIGHT > 16 && playerBullet.location[1] < 160) {
-    playerBullet.location[1] = playerBullet.location[1] - 1 * playerBullet.speed;
-    move_sprite(playerBullet.spriteIndex, playerBullet.location[0], playerBullet.location[1]);
+void update_player_bullet() {
+  if (player_bullet.location[1] + SPRITE_HEIGHT > 16 && player_bullet.location[1] < 160) {
+    player_bullet.location[1] = player_bullet.location[1] - 1 * player_bullet.speed;
+    move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
   } else {
-    player.canShoot = TRUE;
+    player.can_shoot = TRUE;
   }
 }
 
-void updateEnemies() {
-  for (UINT8 i=0; i<ENEMY_ARRAY_LENGTH; i++) {
+void update_enemies() {
+  for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
     // Already destroyed enemies don't need updating.
     if (!enemies[i].destroyed) {
       // Check whether the enemy is being hit by the player's bullet.
-      if (playerBullet.location[0] + playerBullet.spriteLeftOffset < enemies[i].location[0] + enemies[i].spriteRightOffset + SPRITE_WIDTH &&
-              playerBullet.location[0] - playerBullet.spriteRightOffset + SPRITE_WIDTH > enemies[i].location[0] - enemies[i].spriteLeftOffset &&
-              playerBullet.location[1] + playerBullet.spriteTopOffset < enemies[i].location[1] - enemies[i].spriteBottomOffset + SPRITE_HEIGHT &&
-              playerBullet.location[1] - playerBullet.spriteBottomOffset + SPRITE_HEIGHT > enemies[i].location[1] + enemies[i].spriteTopOffset
+      if (player_bullet.location[0] + player_bullet.sprite_left_offset < enemies[i].location[0] + enemies[i].sprite_right_offset + SPRITE_WIDTH &&
+              player_bullet.location[0] - player_bullet.sprite_right_offset + SPRITE_WIDTH > enemies[i].location[0] - enemies[i].sprite_left_offset &&
+              player_bullet.location[1] + player_bullet.sprite_top_offset < enemies[i].location[1] - enemies[i].sprite_bottom_offset + SPRITE_HEIGHT &&
+              player_bullet.location[1] - player_bullet.sprite_bottom_offset + SPRITE_HEIGHT > enemies[i].location[1] + enemies[i].sprite_top_offset
       ) {
         // Set the explosion x location first, since we will move the destroyed enemies.
         explosion.location[0] = enemies[i].location[0];
@@ -104,46 +104,46 @@ void updateEnemies() {
         set_sound(SOUND_EXPLOSION);
 
         // Top enemy hit.
-        if ((playerBullet.location[1] + playerBullet.spriteTopOffset <= enemies[i].location[1] + HALF_SPRITE_HEIGHT)) {
+        if ((player_bullet.location[1] + player_bullet.sprite_top_offset <= enemies[i].location[1] + HALF_SPRITE_HEIGHT)) {
           explosion.location[1] = enemies[i].location[1];
           // If the bottom enemy still exists, we update to only show that one.
-          if (enemies[i].bottomEnemy) {
-            enemies[i].topEnemy = FALSE;
-            enemies[i].spriteTopOffset = 8;
-            set_sprite_tile(enemies[i].spriteIndex, ENEMY_MULTI_TILE_INDEX + 4);
+          if (enemies[i].bottom_enemy) {
+            enemies[i].top_enemy = FALSE;
+            enemies[i].sprite_top_offset = 8;
+            set_sprite_tile(enemies[i].sprite_index, ENEMY_MULTI_TILE_INDEX + 4);
           } else {
             // Enemy is totally destroyed.
             enemies[i].destroyed = TRUE;
             enemies[i].location[0] = 0;
             enemies[i].location[1] = 0;
-            move_sprite(enemies[i].spriteIndex, 0, 0);
+            move_sprite(enemies[i].sprite_index, 0, 0);
           }
         } else {
           // Bottom enemy hit.
           explosion.location[1] = enemies[i].location[1] + HALF_SPRITE_HEIGHT;
           // If the top enemy still exists, we update to only show that one.
-          if (enemies[i].topEnemy) {
-            enemies[i].bottomEnemy = FALSE;
-            enemies[i].spriteBottomOffset = 1 + 8;
-            set_sprite_tile(enemies[i].spriteIndex, ENEMY_MULTI_TILE_INDEX + 2);
+          if (enemies[i].top_enemy) {
+            enemies[i].bottom_enemy = FALSE;
+            enemies[i].sprite_bottom_offset = 1 + 8;
+            set_sprite_tile(enemies[i].sprite_index, ENEMY_MULTI_TILE_INDEX + 2);
           } else {
             // Enemy is totally destroyed.
             enemies[i].destroyed = TRUE;
             enemies[i].location[0] = 0;
             enemies[i].location[1] = 0;
-            move_sprite(enemies[i].spriteIndex, 0, 0);
+            move_sprite(enemies[i].sprite_index, 0, 0);
           }
         }
 
         // Update the explosion to show on the enemies location.
-        explosion.timeSinceAnimationStart = 0;
-        move_sprite(explosion.spriteIndex, explosion.location[0], explosion.location[1]);
-        explosion.isOnScreen = TRUE;
+        explosion.time_since_animation_start = 0;
+        move_sprite(explosion.sprite_index, explosion.location[0], explosion.location[1]);
+        explosion.is_on_screen = TRUE;
 
         // Destroy the player's bullet.
-        playerBullet.location[0] = 0;
-        playerBullet.location[1] = 1;
-        move_sprite(playerBullet.spriteIndex, playerBullet.location[0], playerBullet.location[1]);
+        player_bullet.location[0] = 0;
+        player_bullet.location[1] = 1;
+        move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
 
         // Update the score.
         bcd_add(&score, &enemies[i].value);
@@ -152,52 +152,50 @@ void updateEnemies() {
   }
 }
 
-void updateWindow() {
+void update_window() {
   unsigned char buffer[9];
   bcd2text(&score, 0x01, buffer);
   set_win_tiles(6, 0, 8, 1, buffer);
 }
 
 void createEnemies() {
-  Enemy *enemy = enemies;
-  for (UINT8 i=0; i<ENEMY_ARRAY_LENGTH; i++) {
-    enemy->spriteIndex = 15 + i;
+  enemy_t *enemy = enemies;
+  for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
+    enemy->sprite_index = 15 + i;
     enemy->location[0] = 24 + SPRITE_WIDTH * 2 * (i % 8);
     enemy->location[1] = 30 + SPRITE_HEIGHT * (i / 8);
     enemy->destroyed = FALSE;
     enemy->value = MAKE_BCD(100);
-    move_sprite(enemy->spriteIndex, enemy->location[0], enemy->location[1]);
+    move_sprite(enemy->sprite_index, enemy->location[0], enemy->location[1]);
 
-    switch (enemyGroup1[i])
+    switch (enemy_group1[i])
     {
     case 1:
-      enemy->spriteTopOffset = 0;
-      enemy->spriteBottomOffset = 1;
-      enemy->spriteLeftOffset = 0;
-      enemy->spriteRightOffset = 0;
-      enemy->topEnemy = TRUE;
-      enemy->bottomEnemy = TRUE;
-      set_sprite_tile(enemy->spriteIndex, ENEMY_MULTI_TILE_INDEX);
+      enemy->sprite_top_offset = 0;
+      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_left_offset = 0;
+      enemy->sprite_right_offset = 0;
+      enemy->top_enemy = TRUE;
+      enemy->bottom_enemy = TRUE;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX);
       break;
     case 2:
-      enemy->spriteTopOffset = 0;
-      enemy->spriteBottomOffset = 1 + HALF_SPRITE_HEIGHT;
-      enemy->spriteLeftOffset = 0;
-      enemy->spriteRightOffset = 0;
-      enemy->topEnemy = TRUE;
-      enemy->bottomEnemy = FALSE;
-      set_sprite_tile(enemy->spriteIndex, ENEMY_MULTI_TILE_INDEX + 2);
+      enemy->sprite_top_offset = 0;
+      enemy->sprite_bottom_offset = 1 + HALF_SPRITE_HEIGHT;
+      enemy->sprite_left_offset = 0;
+      enemy->sprite_right_offset = 0;
+      enemy->top_enemy = TRUE;
+      enemy->bottom_enemy = FALSE;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 2);
       break;
     case 3:
-      enemy->spriteTopOffset = HALF_SPRITE_HEIGHT;
-      enemy->spriteBottomOffset = 1;
-      enemy->spriteLeftOffset = 0;
-      enemy->spriteRightOffset = 0;
-      enemy->topEnemy = FALSE;
-      enemy->bottomEnemy = TRUE;
-      set_sprite_tile(enemy->spriteIndex, ENEMY_MULTI_TILE_INDEX + 4);
-      break;    
-    default:
+      enemy->sprite_top_offset = HALF_SPRITE_HEIGHT;
+      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_left_offset = 0;
+      enemy->sprite_right_offset = 0;
+      enemy->top_enemy = FALSE;
+      enemy->bottom_enemy = TRUE;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 4);
       break;
     }
 
@@ -210,109 +208,111 @@ void main() {
   SHOW_SPRITES;
   SHOW_WIN;
 
+  // Initialize sound and music.
   sound_cnt_ch1 = 0;
   sound_cnt_ch4 = 0;
   init_sound();
   set_music(MUSIC_INTRO);
 
-  // Create the score text
-  unsigned char scoreText[] = {0x1D, 0xD, 0x19, 0x1C, 0xF};
-  set_win_tiles(0, 0, 5, 1, scoreText);
-
+  // Create font.
   font_t min_font;
   font_init();
   min_font = font_load(font_min);
   font_set(min_font);
 
+  // Create the score text on screen.
+  unsigned char scoreText[] = {0x1D, 0xD, 0x19, 0x1C, 0xF};
+  set_win_tiles(0, 0, 5, 1, scoreText);
+
   // Set initial values of the player instance.
-  player.spriteCount = 2;
-  player.spriteIndex = 0;
+  player.sprite_count = 2;
+  player.sprite_index = 0;
   player.location[0] = 30;
   player.location[1] = 140;
-  player.timeSinceAnimationStart = 0;
-  player.timeSinceLastMoved = 0;
-  player.moveSpeedDelay = 0;
-  player.canMove = TRUE;
-  player.canShoot = TRUE;
+  player.time_since_animation_start = 0;
+  player.time_since_last_moved = 0;
+  player.move_speed_delay = 0;
+  player.can_move = TRUE;
+  player.can_shoot = TRUE;
   // Set player sprite data.
-  set_sprite_data(PLAYER_TILE_INDEX, player.spriteCount * 2, PlayerSprites);
-  move_sprite(player.spriteIndex, player.location[0], player.location[1]);
+  set_sprite_data(PLAYER_TILE_INDEX, player.sprite_count * 2, player_sprites);
+  move_sprite(player.sprite_index, player.location[0], player.location[1]);
 
   // Set initial values of the player bullet instance.
-  playerBullet.spriteCount = 1;
-  playerBullet.spriteIndex = 1;
-  playerBullet.location[0] = 0;
-  playerBullet.location[1] = 0;
-  playerBullet.speed = 3;
-  playerBullet.spriteLeftOffset = 3;
-  playerBullet.spriteRightOffset = 3;
-  playerBullet.spriteTopOffset = 0;
-  playerBullet.spriteBottomOffset = 8;
+  player_bullet.sprite_count = 1;
+  player_bullet.sprite_index = 1;
+  player_bullet.location[0] = 0;
+  player_bullet.location[1] = 0;
+  player_bullet.speed = 3;
+  player_bullet.sprite_left_offset = 3;
+  player_bullet.sprite_right_offset = 3;
+  player_bullet.sprite_top_offset = 0;
+  player_bullet.sprite_bottom_offset = 8;
   // Set player bullet sprite data.
-  set_sprite_data(PLAYER_BULLET_TILE_INDEX, playerBullet.spriteCount * TILE_INDEX_MULTIPLIER, BulletSprites);
-  set_sprite_tile(playerBullet.spriteIndex, PLAYER_BULLET_TILE_INDEX);
+  set_sprite_data(PLAYER_BULLET_TILE_INDEX, player_bullet.sprite_count * TILE_INDEX_MULTIPLIER, bullet_sprites);
+  set_sprite_tile(player_bullet.sprite_index, PLAYER_BULLET_TILE_INDEX);
 
   // Set initial values of enemy instances.
   createEnemies();
   // Set enemy sprite data.
-  set_sprite_data(ENEMY_MULTI_TILE_INDEX, 3 * TILE_INDEX_MULTIPLIER, MultipleEnemySprites);
+  set_sprite_data(ENEMY_MULTI_TILE_INDEX, 3 * TILE_INDEX_MULTIPLIER, multiple_enemy_sprites);
 
   // Set initial values of the explosion instance.
-  explosion.spriteIndex = 39;
+  explosion.sprite_index = 39;
   explosion.location[0] = 0;
   explosion.location[1] = 0;
-  explosion.isOnScreen = FALSE;
+  explosion.is_on_screen = FALSE;
   // Set explostion sprite data.
-  set_sprite_data(EXPLOSION_TILE_INDEX, 1 * TILE_INDEX_MULTIPLIER, ExplosionSprite);
-  set_sprite_tile(explosion.spriteIndex, EXPLOSION_TILE_INDEX);
+  set_sprite_data(EXPLOSION_TILE_INDEX, 1 * TILE_INDEX_MULTIPLIER, explosion_sprites);
+  set_sprite_tile(explosion.sprite_index, EXPLOSION_TILE_INDEX);
 
   // Game loop.
   while (1) {
     
     // Player controls
-    if (player.canMove) {
+    if (player.can_move) {
       if (joypad()&J_LEFT) {
         if (player.location[0] - 1 >= 8) {
           player.location[0]--;
-          move_sprite(player.spriteIndex, player.location[0], player.location[1]);
-          player.canMove = FALSE;
+          move_sprite(player.sprite_index, player.location[0], player.location[1]);
+          player.can_move = FALSE;
         }
       }
       if (joypad()&J_RIGHT) {
         if (player.location[0] + SPRITE_WIDTH + 1 <= 168) {
           player.location[0]++;
-          move_sprite(player.spriteIndex, player.location[0], player.location[1]);
-          player.canMove = FALSE;
+          move_sprite(player.sprite_index, player.location[0], player.location[1]);
+          player.can_move = FALSE;
         }
       }
     }
     if (joypad()&J_A) {
-      if (player.canShoot) {
-        playerBullet.location[0] = player.location[0];
-        playerBullet.location[1] = player.location[1] - 1;
-        move_sprite(playerBullet.spriteIndex, playerBullet.location[0], playerBullet.location[1]);
-        player.canShoot = FALSE;
+      if (player.can_shoot) {
+        player_bullet.location[0] = player.location[0];
+        player_bullet.location[1] = player.location[1] - 1;
+        move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
+        player.can_shoot = FALSE;
         set_sound(SOUND_PLAYER_SHOOT);
       }
     }
 
+    // If music and/or sound are set, play them.
     play_music();
     play_sound();
 
     // Update everything for the player.
-    updatePlayer();
-    animatePlayer();
+    update_player();
+    animate_player();
 
-    // Update everything with enemies.
-    updateEnemies();
+    update_enemies();
 
-    updateExplosion();
+    update_explosion();
     
-    updatePlayerBullet();
+    update_player_bullet();
     
-    updateWindow();
+    update_window();
 
-    performantdelay(1);
+    performant_delay(1);
   }
   
 }

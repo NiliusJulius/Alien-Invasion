@@ -1,45 +1,46 @@
 #include <gb/gb.h>
+#include <stdbool.h>
 
 // Player
 typedef struct Player {
-  UINT8 spriteCount;
-  UINT8 spriteIndex;
-  UINT8 location[2];
-  UINT8 timeSinceAnimationStart;
-  UINT8 timeSinceLastMoved;
-  UINT8 moveSpeedDelay;
-  BOOLEAN canMove;
-  BOOLEAN canShoot;
-} Player;
+  uint8_t sprite_count;
+  uint8_t sprite_index;
+  uint8_t location[2];
+  uint8_t time_since_animation_start;
+  uint8_t time_since_last_moved;
+  uint8_t move_speed_delay;
+  bool can_move;
+  bool can_shoot;
+} player_t;
 
 // Player bullet
 typedef struct Bullet {
-  UINT8 spriteCount;
-  UINT8 spriteIndex;
-  UINT8 location[2];
-  UINT8 speed;
-  UINT8 spriteLeftOffset;
-  UINT8 spriteRightOffset;
-  UINT8 spriteTopOffset;
-  UINT8 spriteBottomOffset;
-} Bullet;
+  uint8_t sprite_count;
+  uint8_t sprite_index;
+  uint8_t location[2];
+  uint8_t speed;
+  uint8_t sprite_left_offset;
+  uint8_t sprite_right_offset;
+  uint8_t sprite_top_offset;
+  uint8_t sprite_bottom_offset;
+} bullet_t;
 
 typedef struct Enemy {
-  UINT8 spriteIndex;
-  UINT8 location[2];
-  UINT8 spriteLeftOffset;
-  UINT8 spriteRightOffset;
-  UINT8 spriteTopOffset;
-  UINT8 spriteBottomOffset;
-  BOOLEAN topEnemy;
-  BOOLEAN bottomEnemy;
-  BOOLEAN destroyed;
+  uint8_t sprite_index;
+  uint8_t location[2];
+  uint8_t sprite_left_offset;
+  uint8_t sprite_right_offset;
+  uint8_t sprite_top_offset;
+  uint8_t sprite_bottom_offset;
+  bool top_enemy;
+  bool bottom_enemy;
+  bool destroyed;
   BCD value;
-} Enemy;
+} enemy_t;
 
 typedef struct Explosion {
-  UINT8 spriteIndex;
-  UINT8 location[2];
-  UINT8 timeSinceAnimationStart;
-  UINT8 isOnScreen;
-} Explosion;
+  uint8_t sprite_index;
+  uint8_t location[2];
+  uint8_t time_since_animation_start;
+  uint8_t is_on_screen;
+} explosion_t;

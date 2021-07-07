@@ -6,7 +6,7 @@
 #define MUSIC_INTRO 0
 
 void init_sound();
-void set_music(UINT8 song);
+void set_music(uint8_t song);
 void play_music();
 void stop_music();
 void restart_music();
