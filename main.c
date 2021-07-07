@@ -4,6 +4,8 @@
 #include "bcd.h"
 #include "typedefs.c"
 #include "enemygroups.c"
+#include "music.h"
+#include "sound.h"
 #include "sprites\PlayerSprites.h"
 #include "sprites\BulletSprites.h"
 #include "sprites\Explosion.h"
@@ -97,6 +99,9 @@ void updateEnemies() {
       ) {
         // Set the explosion x location first, since we will move the destroyed enemies.
         explosion.location[0] = enemies[i].location[0];
+
+        // Play explosion sound.
+        set_sound(SOUND_EXPLOSION);
 
         // Top enemy hit.
         if ((playerBullet.location[1] + playerBullet.spriteTopOffset <= enemies[i].location[1] + HALF_SPRITE_HEIGHT)) {
@@ -205,6 +210,11 @@ void main() {
   SHOW_SPRITES;
   SHOW_WIN;
 
+  sound_cnt_ch1 = 0;
+  sound_cnt_ch4 = 0;
+  init_sound();
+  set_music(MUSIC_INTRO);
+
   // Create the score text
   unsigned char scoreText[] = {0x1D, 0xD, 0x19, 0x1C, 0xF};
   set_win_tiles(0, 0, 5, 1, scoreText);
@@ -282,8 +292,12 @@ void main() {
         playerBullet.location[1] = player.location[1] - 1;
         move_sprite(playerBullet.spriteIndex, playerBullet.location[0], playerBullet.location[1]);
         player.canShoot = FALSE;
+        set_sound(SOUND_PLAYER_SHOOT);
       }
     }
+
+    play_music();
+    play_sound();
 
     // Update everything for the player.
     updatePlayer();
