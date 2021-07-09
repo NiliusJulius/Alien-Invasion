@@ -27,6 +27,7 @@
 #define TILE_INDEX_MULTIPLIER 2
 
 #define ENEMY_ARRAY_LENGTH 24
+#define ENEMY_MOVEMENT_DELAY 8
 
 BCD score = MAKE_BCD(0);
 
@@ -34,6 +35,21 @@ player_t player;
 bullet_t player_bullet;
 enemy_t enemies[ENEMY_ARRAY_LENGTH];
 explosion_t explosion;
+
+uint8_t enemy_movement_timer = 0;
+
+// Used to determine movement for next turn.
+uint8_t cur_leftmost_enemy_x = 255;
+uint8_t cur_rightmost_enemy_x = 0;
+
+uint8_t prev_rightmost_enemy_x;
+uint8_t prev_leftmost_enemy_x;
+
+// Movement for this turn.
+int8_t movement_x = 0;
+int8_t movement_y = 0;
+
+bool enemies_move_left = TRUE;
 
 void performant_delay(uint8_t num_loops){
     uint8_t i;
@@ -88,9 +104,34 @@ void update_player_bullet() {
 }
 
 void update_enemies() {
+  if (enemy_movement_timer == ENEMY_MOVEMENT_DELAY) {
+
+    // Determine movement for this turn.
+    if (enemies_move_left) {
+      if (prev_leftmost_enemy_x - 1 < 8) {
+        movement_x = 1;
+        movement_y = 4;
+        enemies_move_left = FALSE;
+      } else {
+        movement_x = -1;
+        movement_y = 0;
+      }
+    } else {
+      if (prev_rightmost_enemy_x + 1 > 168) {
+        movement_x = -1;
+        movement_y = 4;
+        enemies_move_left = TRUE;
+      } else {
+        movement_x = 1;
+        movement_y = 0;
+      }
+    }
+  }
+
   for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
     // Already destroyed enemies don't need updating.
     if (!enemies[i].destroyed) {
+
       // Check whether the enemy is being hit by the player's bullet.
       if (player_bullet.location[0] + player_bullet.sprite_left_offset < enemies[i].location[0] + enemies[i].sprite_right_offset + SPRITE_WIDTH &&
               player_bullet.location[0] - player_bullet.sprite_right_offset + SPRITE_WIDTH > enemies[i].location[0] - enemies[i].sprite_left_offset &&
@@ -116,7 +157,6 @@ void update_enemies() {
             enemies[i].destroyed = TRUE;
             enemies[i].location[0] = 0;
             enemies[i].location[1] = 0;
-            move_sprite(enemies[i].sprite_index, 0, 0);
           }
         } else {
           // Bottom enemy hit.
@@ -131,7 +171,6 @@ void update_enemies() {
             enemies[i].destroyed = TRUE;
             enemies[i].location[0] = 0;
             enemies[i].location[1] = 0;
-            move_sprite(enemies[i].sprite_index, 0, 0);
           }
         }
 
@@ -148,7 +187,37 @@ void update_enemies() {
         // Update the score.
         bcd_add(&score, &enemies[i].value);
       }
+
+      // Enemy movement.
+      if (enemy_movement_timer == ENEMY_MOVEMENT_DELAY) {
+        enemies[i].location[0] = enemies[i].location[0] + movement_x;
+        enemies[i].location[1] = enemies[i].location[1] + movement_y;
+
+        move_sprite(enemies[i].sprite_index, enemies[i].location[0], enemies[i].location[1]);
+      }
+
+      // Prepare for enemy movement next frame.
+      if (enemy_movement_timer == ENEMY_MOVEMENT_DELAY - 1) {
+        if (enemies[i].location[0] < cur_leftmost_enemy_x) {
+          cur_leftmost_enemy_x = enemies[i].location[0];
+        }
+
+        if (enemies[i].location[0] + SPRITE_WIDTH > cur_rightmost_enemy_x) {
+          cur_rightmost_enemy_x = enemies[i].location[0] + SPRITE_WIDTH;
+        }
+      }
     }
+  }
+  if (enemy_movement_timer == ENEMY_MOVEMENT_DELAY - 1) {
+    prev_rightmost_enemy_x = cur_rightmost_enemy_x;
+    prev_leftmost_enemy_x = cur_leftmost_enemy_x;
+    cur_leftmost_enemy_x = 255;
+    cur_rightmost_enemy_x = 0;
+  }
+  if (enemy_movement_timer == ENEMY_MOVEMENT_DELAY) {
+    enemy_movement_timer = 0;
+  } else {
+    enemy_movement_timer++;
   }
 }
 
@@ -162,7 +231,7 @@ void createEnemies() {
   enemy_t *enemy = enemies;
   for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
     enemy->sprite_index = 15 + i;
-    enemy->location[0] = 24 + SPRITE_WIDTH * 2 * (i % 8);
+    enemy->location[0] = 10 + SPRITE_WIDTH * 2 * (i % 8);
     enemy->location[1] = 30 + SPRITE_HEIGHT * (i / 8);
     enemy->destroyed = FALSE;
     enemy->value = MAKE_BCD(100);
@@ -201,6 +270,8 @@ void createEnemies() {
 
     enemy++;
   }
+  prev_leftmost_enemy_x = enemies[0].location[0];
+  prev_rightmost_enemy_x = enemies[ENEMY_ARRAY_LENGTH - 1].location[0] + SPRITE_WIDTH;
 }
 
 void main() {
