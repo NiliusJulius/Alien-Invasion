@@ -93,18 +93,18 @@ void update_enemies() {
               player_bullet.location[1] - player_bullet.sprite_bottom_offset + SPRITE_HEIGHT > enemies[i].location[1] + enemies[i].sprite_top_offset
       ) {
         // Set the explosion x location first, since we will move the destroyed enemies.
-        explosion.location[0] = enemies[i].location[0];
+        explosion.location[0] = enemies[i].location[0] + movement_x;
 
         // Play explosion sound.
         set_sound(SOUND_EXPLOSION);
 
         // Top enemy hit.
         if ((player_bullet.location[1] + player_bullet.sprite_top_offset <= enemies[i].location[1] + HALF_SPRITE_HEIGHT)) {
-          explosion.location[1] = enemies[i].location[1];
+          explosion.location[1] = enemies[i].location[1] + movement_y;
           // If the bottom enemy still exists, we update to only show that one.
           if (enemies[i].bottom_enemy) {
             enemies[i].top_enemy = false;
-            enemies[i].sprite_top_offset = 8;
+            enemies[i].sprite_top_offset = enemies[i].sprite_top_offset + 8;
             set_sprite_tile(enemies[i].sprite_index, ENEMY_MULTI_TILE_INDEX + 4);
           } else {
             // Enemy is totally destroyed.
@@ -114,11 +114,11 @@ void update_enemies() {
           }
         } else {
           // Bottom enemy hit.
-          explosion.location[1] = enemies[i].location[1] + HALF_SPRITE_HEIGHT;
+          explosion.location[1] = enemies[i].location[1] + HALF_SPRITE_HEIGHT + movement_y;
           // If the top enemy still exists, we update to only show that one.
           if (enemies[i].top_enemy) {
             enemies[i].bottom_enemy = false;
-            enemies[i].sprite_bottom_offset = 1 + 8;
+            enemies[i].sprite_bottom_offset = enemies[i].sprite_bottom_offset + 8;
             set_sprite_tile(enemies[i].sprite_index, ENEMY_MULTI_TILE_INDEX + 2);
           } else {
             // Enemy is totally destroyed.
@@ -135,11 +135,16 @@ void update_enemies() {
 
         // Destroy the player's bullet.
         player_bullet.location[0] = 0;
-        player_bullet.location[1] = 1;
+        player_bullet.location[1] = 0;
         move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
 
         // Update the score.
         bcd_add(&score, &enemies[i].value);
+      }
+
+      if (enemies[i].destroyed) {
+        move_sprite(enemies[i].sprite_index, 0, 0);
+        continue;
       }
 
       // Enemy movement.
@@ -291,17 +296,19 @@ void init_game() {
   set_sprite_tile(explosion.sprite_index, EXPLOSION_TILE_INDEX);
 }
 
-void run_level() {
+void run_game() {
+  UPDATE_KEYS();
+
   // Player controls
   if (player.can_move) {
-    if (joypad()&J_LEFT) {
+    if (KEY_DEBOUNCE(J_LEFT)) {
       if (player.location[0] - 1 >= 8) {
         player.location[0]--;
         move_sprite(player.sprite_index, player.location[0], player.location[1]);
         player.can_move = false;
       }
     }
-    if (joypad()&J_RIGHT) {
+    if (KEY_DEBOUNCE(J_RIGHT)) {
       if (player.location[0] + SPRITE_WIDTH + 1 <= 168) {
         player.location[0]++;
         move_sprite(player.sprite_index, player.location[0], player.location[1]);
@@ -309,8 +316,8 @@ void run_level() {
       }
     }
   }
-  if (joypad()&J_A) {
-    if (player.can_shoot) {
+  if (player.can_shoot) {
+    if (KEY_TICKED(J_A)) {
       player_bullet.location[0] = player.location[0];
       player_bullet.location[1] = player.location[1] - 1;
       move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);

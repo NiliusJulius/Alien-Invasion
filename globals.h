@@ -6,8 +6,14 @@
 #include "bcd.h"
 #include "typedefs.h"
 
-#define STATE_TITLE				0
-#define STATE_LEVEL				1
+#define UPDATE_KEYS()	prev_input = curr_input; curr_input = joypad()
+#define KEY_PRESSED(K)	(curr_input & (K))
+#define KEY_DEBOUNCE(K) ((curr_input & (K)) && (prev_input & (K)))
+#define KEY_TICKED(K)   ((curr_input & (K)) && !(prev_input & (K)))
+#define KEY_RELEASED(K) ((prev_input & (K)) && !(curr_input & (K)))
+
+#define STATE_INTRO				0
+#define STATE_GAME				1
 
 #define PLAYER_TILE_INDEX 0
 #define PLAYER_ANIM_SPEED 14
@@ -25,6 +31,9 @@
 
 #define ENEMY_ARRAY_LENGTH 24
 #define ENEMY_MOVEMENT_DELAY 8
+
+extern uint8_t curr_input;
+extern uint8_t prev_input;
 
 extern uint8_t game_state;
 

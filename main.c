@@ -5,7 +5,8 @@
 #include "sound\music.h"
 #include "sound\sound.h"
 
-#include "states\level.h"
+#include "states\game.h"
+#include "states\intro.h"
 
 void main() {
 
@@ -20,16 +21,18 @@ void main() {
   sound_cnt_ch4 = 0;
   init_sound();
 
-  init_game();
-  game_state = STATE_LEVEL;
+  init_intro();
+  game_state = STATE_INTRO;
   
   while (1) {
     switch (game_state) {
-      case STATE_LEVEL:
-        run_level();
+      case STATE_INTRO:
+        run_intro();
+        break;
+      case STATE_GAME:
+        run_game();
         break;
     }
     
   }
-  
 }

@@ -4,6 +4,9 @@
 #include "bcd.h"
 #include "typedefs.h"
 
+uint8_t curr_input;
+uint8_t prev_input;
+
 uint8_t game_state;
 
 BCD score;
