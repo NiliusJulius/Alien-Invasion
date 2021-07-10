@@ -1,4 +1,7 @@
-#include <gb/gb.h>
+#ifndef _TYPEDEFS
+#define _TYPEDEFS
+
+#include <stdint.h>
 #include <stdbool.h>
 
 // Player
@@ -44,3 +47,5 @@ typedef struct Explosion {
   uint8_t time_since_animation_start;
   uint8_t is_on_screen;
 } explosion_t;
+
+#endif

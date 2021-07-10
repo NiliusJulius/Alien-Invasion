@@ -1,7 +1,7 @@
 #ifndef _MUSIC
 #define _MUSIC
 
-#include <gb/gb.h>
+#include <stdint.h>
 
 #define MUSIC_INTRO 0
 

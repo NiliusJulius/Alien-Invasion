@@ -1,7 +1,7 @@
 #ifndef _SOUND
 #define _SOUND
 
-#include <gb/gb.h>
+#include <stdint.h>
 
 #define SOUND_PLAYER_SHOOT 0
 #define SOUND_EXPLOSION 1

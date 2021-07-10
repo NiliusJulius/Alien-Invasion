@@ -1,16 +1,18 @@
 #include <gb/gb.h>
 #include <gb/font.h>
-#include <stdio.h>
 #include "bcd.h"
-#include "typedefs.c"
-#include "enemy_groups.c"
-#include "music.h"
-#include "sound.h"
+
+#include "typedefs.h"
+
+#include "levels\enemy_groups.h"
+
+#include "sound\music.h"
+#include "sound\sound.h"
+
 #include "sprites\player_sprites.h"
 #include "sprites\bullet_sprites.h"
 #include "sprites\explosion_sprites.h"
 #include "sprites\multiple_enemy_sprites.h"
-#include "maps\window_map.h"
 
 #define PLAYER_TILE_INDEX 0
 #define PLAYER_ANIM_SPEED 14
