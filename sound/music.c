@@ -1,9 +1,9 @@
 // Based on the music player code from 0x7f (https://gbdev.gg8.se/forums/profile.php?id=936)
 
+#include "music.h"
 #include <gb/gb.h>
+#include <stdbool.h>
 #include "sound.h"
-
-#define MUSIC_INTRO 0
 
 enum notes
 {
@@ -91,7 +91,7 @@ void init_sound() {
 }
 
 void set_music(uint8_t song) {
-	music_play = TRUE;
+	music_play = true;
 		
 	switch (song) {
 		case MUSIC_INTRO:
@@ -122,7 +122,7 @@ void play_music() {
 	uint16_t freq;
 	uint8_t cwd;
 	
-	if (music_play == TRUE) {
+	if (music_play == true) {
 		// Channel 1
 		if (music_cnt_ch1 == 0)	{	
 			music_cnt_ch1 = *music_ptr_ch1;
@@ -244,11 +244,11 @@ void stop_music() {
 	NR42_REG = 0;
 	NR44_REG = 0;
 		
-	music_play = FALSE;
+	music_play = false;
 }
 
 void restart_music() {
-	music_play = TRUE;
+	music_play = true;
 	
 	music_cnt_ch1 = 0;
 	music_cnt_ch2 = 0;

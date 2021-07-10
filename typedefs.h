@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "bcd.h"
 
 // Player
 typedef struct Player {

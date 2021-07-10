@@ -1,9 +1,7 @@
 // Based on the music player code from 0x7f (https://gbdev.gg8.se/forums/profile.php?id=936)
 
+#include "sound.h"
 #include <gb/gb.h>
-
-#define SOUND_PLAYER_SHOOT 0
-#define SOUND_EXPLOSION 1
 
 const unsigned char soundPlayerShoot[][6] =
 {
