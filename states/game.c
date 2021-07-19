@@ -24,7 +24,13 @@ void animate_player() {
   }
 
   set_sprite_tile(player.sprite_index, current_frame * TILE_INDEX_MULTIPLIER);
+  set_sprite_tile(player.sprite_index + 2, current_frame * TILE_INDEX_MULTIPLIER);
   player.time_since_animation_start = player.time_since_animation_start + 1;
+}
+
+void move_player() {
+  move_sprite(player.sprite_index, player.location[0], player.location[1]);
+  move_sprite(player.sprite_index + 2, player.location[0] + SPRITE_WIDTH, player.location[1]);
 }
 
 void update_explosion() {
@@ -99,7 +105,7 @@ void update_enemies() {
         set_sound(SOUND_EXPLOSION);
 
         // Top enemy hit.
-        if ((player_bullet.location[1] + player_bullet.sprite_top_offset <= enemies[i].location[1] + HALF_SPRITE_HEIGHT)) {
+        if (enemies[i].top_enemy && (player_bullet.location[1] + player_bullet.sprite_top_offset <= enemies[i].location[1] + HALF_SPRITE_HEIGHT)) {
           explosion.location[1] = enemies[i].location[1] + movement_y;
           // If the bottom enemy still exists, we update to only show that one.
           if (enemies[i].bottom_enemy) {
@@ -257,7 +263,7 @@ void init_game() {
   player.sprite_count = 2;
   player.sprite_index = 0;
   player.location[0] = 30;
-  player.location[1] = 140;
+  player.location[1] = 144;
   player.time_since_animation_start = 0;
   player.time_since_last_moved = 0;
   player.move_speed_delay = 0;
@@ -265,7 +271,8 @@ void init_game() {
   player.can_shoot = true;
   // Set player sprite data.
   set_sprite_data(PLAYER_TILE_INDEX, player.sprite_count * 2, player_sprites);
-  move_sprite(player.sprite_index, player.location[0], player.location[1]);
+  set_sprite_prop(player.sprite_index + 2, S_FLIPX);
+  move_player();
 
   // Set initial values of the player bullet instance.
   player_bullet.sprite_count = 1;
@@ -304,22 +311,22 @@ void run_game() {
     if (KEY_DEBOUNCE(J_LEFT)) {
       if (player.location[0] - 1 >= 8) {
         player.location[0]--;
-        move_sprite(player.sprite_index, player.location[0], player.location[1]);
+        move_player();
         player.can_move = false;
       }
     }
     if (KEY_DEBOUNCE(J_RIGHT)) {
       if (player.location[0] + SPRITE_WIDTH + 1 <= 168) {
         player.location[0]++;
-        move_sprite(player.sprite_index, player.location[0], player.location[1]);
+        move_player();
         player.can_move = false;
       }
     }
   }
   if (player.can_shoot) {
     if (KEY_TICKED(J_A)) {
-      player_bullet.location[0] = player.location[0];
-      player_bullet.location[1] = player.location[1] - 1;
+      player_bullet.location[0] = player.location[0] + SPRITE_WIDTH / 2;
+      player_bullet.location[1] = player.location[1] - 3;
       move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
       player.can_shoot = false;
       set_sound(SOUND_PLAYER_SHOOT);

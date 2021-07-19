@@ -1,6 +1,6 @@
 /*
 
- PLAYERSPRITES.H
+ PLAYER_SPRITES.H
 
  Include File.
 
@@ -9,8 +9,8 @@
   Format               : Gameboy 4 color.
   Compression          : None.
   Counter              : None.
-  Tile size            : 8 x 8
-  Tiles                : 0 to 3
+  Tile size            : 8 x 16
+  Tiles                : 0 to 1
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -22,10 +22,14 @@
 
 */
 
+#ifndef __player_sprites_h_INCLUDE
+#define __player_sprites_h_INCLUDE
 
 /* Bank of tiles. */
-#define PlayerSpritesBank 0
+#define player_spritesBank 0
 /* Start of tile array. */
-extern unsigned char player_sprites[];
+extern const unsigned char player_sprites[];
 
-/* End of PLAYERSPRITES.H */
+#endif
+
+/* End of PLAYER_SPRITES.H */
