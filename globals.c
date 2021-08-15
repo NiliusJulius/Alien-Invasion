@@ -16,7 +16,9 @@ bullet_t player_bullet;
 enemy_t enemies[ENEMY_ARRAY_LENGTH];
 explosion_t explosion;
 
+uint8_t enemies_remaining;
 uint8_t enemy_movement_timer;
+uint8_t enemy_stage;
 
 // Used to determine movement for next turn.
 uint8_t cur_leftmost_enemy_x;

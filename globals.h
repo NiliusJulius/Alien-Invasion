@@ -29,6 +29,7 @@
 // Because we are running in 8x16 sprite mode, all tile indexes should be multiplied by 2.
 #define TILE_INDEX_MULTIPLIER 2
 
+#define ENEMY_GROUPS_COUNT 2
 #define ENEMY_ARRAY_LENGTH 24
 #define ENEMY_MOVEMENT_DELAY 8
 
@@ -44,7 +45,9 @@ extern bullet_t player_bullet;
 extern enemy_t enemies[ENEMY_ARRAY_LENGTH];
 extern explosion_t explosion;
 
+extern uint8_t enemies_remaining;
 extern uint8_t enemy_movement_timer;
+extern uint8_t enemy_stage;
 
 // Used to determine movement for next turn.
 extern uint8_t cur_leftmost_enemy_x;

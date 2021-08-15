@@ -2,7 +2,8 @@
 #define _ENEMY_GROUPS
 
 #include <stdint.h>
+#include "..\globals.h"
 
-extern uint8_t enemy_group1[34];
+extern uint8_t enemy_groups[ENEMY_GROUPS_COUNT][ENEMY_ARRAY_LENGTH];
 
 #endif

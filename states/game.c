@@ -63,7 +63,67 @@ void update_player_bullet() {
   }
 }
 
+/* 
+  #################
+  START ENEMY LOGIC
+  #################
+*/
+
+void createEnemies() {
+  enemy_t *enemy = enemies;
+  for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
+    enemy->sprite_index = 15 + i;
+    enemy->location[0] = 28 + SPRITE_WIDTH * 2 * (i % 8);
+    enemy->location[1] = 30 + SPRITE_HEIGHT * (i / 8);
+    enemy->destroyed = false;
+    enemy->value = MAKE_BCD(100);
+    move_sprite(enemy->sprite_index, enemy->location[0], enemy->location[1]);
+
+    switch (enemy_groups[enemy_stage % ENEMY_GROUPS_COUNT][i])
+    {
+    case 1:
+      enemy->sprite_top_offset = 0;
+      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_left_offset = 0;
+      enemy->sprite_right_offset = 0;
+      enemy->top_enemy = true;
+      enemy->bottom_enemy = true;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX);
+      enemies_remaining += 2;
+      break;
+    case 2:
+      enemy->sprite_top_offset = 0;
+      enemy->sprite_bottom_offset = 1 + HALF_SPRITE_HEIGHT;
+      enemy->sprite_left_offset = 0;
+      enemy->sprite_right_offset = 0;
+      enemy->top_enemy = true;
+      enemy->bottom_enemy = false;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 2);
+      enemies_remaining += 1;
+      break;
+    case 3:
+      enemy->sprite_top_offset = HALF_SPRITE_HEIGHT;
+      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_left_offset = 0;
+      enemy->sprite_right_offset = 0;
+      enemy->top_enemy = false;
+      enemy->bottom_enemy = true;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 4);
+      enemies_remaining += 1;
+      break;
+    }
+
+    enemy++;
+  }
+  prev_leftmost_enemy_x = enemies[0].location[0];
+  prev_rightmost_enemy_x = enemies[ENEMY_ARRAY_LENGTH - 1].location[0] + SPRITE_WIDTH;
+}
+
 void update_enemies() {
+  if (enemies_remaining == 0) {
+    enemy_stage += 1;
+    createEnemies();
+  }
   if (enemy_movement_timer == ENEMY_MOVEMENT_DELAY) {
 
     // Determine movement for this turn.
@@ -144,8 +204,9 @@ void update_enemies() {
         player_bullet.location[1] = 0;
         move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
 
-        // Update the score.
+        // Update the score and enemy count.
         bcd_add(&score, &enemies[i].value);
+        enemies_remaining -= 1;
       }
 
       if (enemies[i].destroyed) {
@@ -186,57 +247,46 @@ void update_enemies() {
   }
 }
 
+/* 
+  ###############
+  END ENEMY LOGIC
+  ###############
+*/
+
 void update_window() {
   unsigned char buffer[9];
   bcd2text(&score, 0x01, buffer);
   set_win_tiles(6, 0, 8, 1, buffer);
 }
 
-void createEnemies() {
-  enemy_t *enemy = enemies;
-  for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
-    enemy->sprite_index = 15 + i;
-    enemy->location[0] = 28 + SPRITE_WIDTH * 2 * (i % 8);
-    enemy->location[1] = 30 + SPRITE_HEIGHT * (i / 8);
-    enemy->destroyed = false;
-    enemy->value = MAKE_BCD(100);
-    move_sprite(enemy->sprite_index, enemy->location[0], enemy->location[1]);
 
-    switch (enemy_group1[i])
-    {
-    case 1:
-      enemy->sprite_top_offset = 0;
-      enemy->sprite_bottom_offset = 1;
-      enemy->sprite_left_offset = 0;
-      enemy->sprite_right_offset = 0;
-      enemy->top_enemy = true;
-      enemy->bottom_enemy = true;
-      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX);
-      break;
-    case 2:
-      enemy->sprite_top_offset = 0;
-      enemy->sprite_bottom_offset = 1 + HALF_SPRITE_HEIGHT;
-      enemy->sprite_left_offset = 0;
-      enemy->sprite_right_offset = 0;
-      enemy->top_enemy = true;
-      enemy->bottom_enemy = false;
-      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 2);
-      break;
-    case 3:
-      enemy->sprite_top_offset = HALF_SPRITE_HEIGHT;
-      enemy->sprite_bottom_offset = 1;
-      enemy->sprite_left_offset = 0;
-      enemy->sprite_right_offset = 0;
-      enemy->top_enemy = false;
-      enemy->bottom_enemy = true;
-      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 4);
-      break;
+void update_controls() {
+  // Player controls
+  if (player.can_move) {
+    if (KEY_DEBOUNCE(J_LEFT)) {
+      if (player.location[0] - 1 >= 8) {
+        player.location[0]--;
+        move_player();
+        player.can_move = false;
+      }
     }
-
-    enemy++;
+    if (KEY_DEBOUNCE(J_RIGHT)) {
+      if (player.location[0] + SPRITE_WIDTH + 1 <= 168) {
+        player.location[0]++;
+        move_player();
+        player.can_move = false;
+      }
+    }
   }
-  prev_leftmost_enemy_x = enemies[0].location[0];
-  prev_rightmost_enemy_x = enemies[ENEMY_ARRAY_LENGTH - 1].location[0] + SPRITE_WIDTH;
+  if (player.can_shoot) {
+    if (KEY_TICKED(J_A)) {
+      player_bullet.location[0] = player.location[0] + SPRITE_WIDTH / 2;
+      player_bullet.location[1] = player.location[1] - 3;
+      move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
+      player.can_shoot = false;
+      set_sound(SOUND_PLAYER_SHOOT);
+    }
+  }
 }
 
 void init_game() {
@@ -252,7 +302,9 @@ void init_game() {
   unsigned char scoreText[] = {0x1D, 0xD, 0x19, 0x1C, 0xF};
   set_win_tiles(0, 0, 5, 1, scoreText);
 
+  enemies_remaining = 0;
   enemy_movement_timer = 0;
+  enemy_stage = 0;
   cur_leftmost_enemy_x = 255;
   cur_rightmost_enemy_x = 0;
   movement_x = 0;
@@ -305,33 +357,7 @@ void init_game() {
 
 void run_game() {
   UPDATE_KEYS();
-
-  // Player controls
-  if (player.can_move) {
-    if (KEY_DEBOUNCE(J_LEFT)) {
-      if (player.location[0] - 1 >= 8) {
-        player.location[0]--;
-        move_player();
-        player.can_move = false;
-      }
-    }
-    if (KEY_DEBOUNCE(J_RIGHT)) {
-      if (player.location[0] + SPRITE_WIDTH + 1 <= 168) {
-        player.location[0]++;
-        move_player();
-        player.can_move = false;
-      }
-    }
-  }
-  if (player.can_shoot) {
-    if (KEY_TICKED(J_A)) {
-      player_bullet.location[0] = player.location[0] + SPRITE_WIDTH / 2;
-      player_bullet.location[1] = player.location[1] - 3;
-      move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
-      player.can_shoot = false;
-      set_sound(SOUND_PLAYER_SHOOT);
-    }
-  }
+  update_controls();  
 
   // If music and/or sound are set, play them.
   play_music();
