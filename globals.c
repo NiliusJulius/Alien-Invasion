@@ -32,3 +32,6 @@ int8_t movement_x;
 int8_t movement_y;
 
 bool enemies_move_left;
+bool enemies_move_down;
+uint8_t enemies_move_delay;
+uint8_t enemies_move_delay_decrease;

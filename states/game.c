@@ -123,15 +123,21 @@ void createEnemies() {
 void update_enemies() {
   if (enemies_remaining == 0) {
     enemy_stage += 1;
+    if (enemies_move_delay <= enemy_stage * enemies_move_delay_decrease) {
+      enemies_move_delay = 1;
+    } else {
+      enemies_move_delay -= enemy_stage * enemies_move_delay_decrease;
+    }
     createEnemies();
   }
-  if (enemy_movement_timer == ENEMY_MOVEMENT_DELAY) {
+  if (enemy_movement_timer == enemies_move_delay) {
 
     // Determine movement for this turn.
     if (enemies_move_left) {
       if (prev_leftmost_enemy_x - 1 < 8) {
-        movement_x = 1;
+        movement_x = 0;
         movement_y = 4;
+        enemies_move_down = true;
         enemies_move_left = false;
       } else {
         movement_x = -1;
@@ -139,8 +145,9 @@ void update_enemies() {
       }
     } else {
       if (prev_rightmost_enemy_x + 1 > 168) {
-        movement_x = -1;
+        movement_x = 0;
         movement_y = 4;
+        enemies_move_down = true;
         enemies_move_left = true;
       } else {
         movement_x = 1;
@@ -216,7 +223,7 @@ void update_enemies() {
       }
 
       // Enemy movement.
-      if (enemy_movement_timer == ENEMY_MOVEMENT_DELAY) {
+      if (enemy_movement_timer == enemies_move_delay) {
         enemies[i].location[0] = enemies[i].location[0] + movement_x;
         enemies[i].location[1] = enemies[i].location[1] + movement_y;
 
@@ -224,7 +231,7 @@ void update_enemies() {
       }
 
       // Prepare for enemy movement next frame.
-      if (enemy_movement_timer == ENEMY_MOVEMENT_DELAY - 1) {
+      if (enemy_movement_timer == enemies_move_delay - 1) {
         if (enemies[i].location[0] < cur_leftmost_enemy_x) {
           cur_leftmost_enemy_x = enemies[i].location[0];
         }
@@ -235,14 +242,22 @@ void update_enemies() {
       }
     }
   }
-  if (enemy_movement_timer == ENEMY_MOVEMENT_DELAY - 1) {
+  if (enemy_movement_timer == enemies_move_delay - 1) {
     prev_rightmost_enemy_x = cur_rightmost_enemy_x;
     prev_leftmost_enemy_x = cur_leftmost_enemy_x;
     cur_leftmost_enemy_x = 255;
     cur_rightmost_enemy_x = 0;
   }
-  if (enemy_movement_timer == ENEMY_MOVEMENT_DELAY) {
+  if (enemy_movement_timer == enemies_move_delay) {
     enemy_movement_timer = 0;
+    if (enemies_move_down) {
+      enemies_move_down = false;
+      if (enemies_move_delay <= enemies_move_delay_decrease) {
+        enemies_move_delay = 1;
+      } else {
+        enemies_move_delay -= enemies_move_delay_decrease;
+      }
+    }
   } else {
     enemy_movement_timer++;
   }
@@ -311,6 +326,9 @@ void init_game() {
   movement_x = 0;
   movement_y = 0;
   enemies_move_left = false;
+  enemies_move_down = false;
+  enemies_move_delay = ENEMY_MOVEMENT_DELAY;
+  enemies_move_delay_decrease = ENEMY_MOVEMENT_DELAY_DECREASE;
 
   // Set initial values of the player instance.
   player.sprite_count = 2;
