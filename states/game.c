@@ -113,6 +113,7 @@ void createEnemies() {
       break;
     }
 
+    wait_vbl_done();
     enemy++;
   }
   prev_leftmost_enemy_x = enemies[0].location[0];
@@ -340,10 +341,10 @@ void init_game() {
   set_sprite_data(PLAYER_BULLET_TILE_INDEX, player_bullet.sprite_count * TILE_INDEX_MULTIPLIER, bullet_sprites);
   set_sprite_tile(player_bullet.sprite_index, PLAYER_BULLET_TILE_INDEX);
 
-  // Set initial values of enemy instances.
-  createEnemies();
   // Set enemy sprite data.
   set_sprite_data(ENEMY_MULTI_TILE_INDEX, 3 * TILE_INDEX_MULTIPLIER, multiple_enemy_sprites);
+  // Set initial values of enemy instances.
+  createEnemies();
 
   // Set initial values of the explosion instance.
   explosion.sprite_index = 39;
