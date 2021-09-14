@@ -31,8 +31,9 @@
 
 #define ENEMY_GROUPS_COUNT 2
 #define ENEMY_ARRAY_LENGTH 24
-#define ENEMY_MOVEMENT_DELAY 24
+#define ENEMY_MOVEMENT_DELAY 48
 #define ENEMY_MOVEMENT_DELAY_DECREASE 1
+#define ENEMY_MOVEMENT_DELAY_MIN 5
 
 extern uint8_t curr_input;
 extern uint8_t prev_input;

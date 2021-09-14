@@ -1,4 +1,3 @@
-
 #include <stdint.h>
 #include <gb\gb.h>
 #include "..\typedefs.h"
@@ -123,10 +122,10 @@ void createEnemies() {
 void update_enemies() {
   if (enemies_remaining == 0) {
     enemy_stage += 1;
-    if (enemies_move_delay <= enemy_stage * enemies_move_delay_decrease) {
-      enemies_move_delay = 1;
+    if (enemies_move_delay - enemies_move_delay_decrease <= ENEMY_MOVEMENT_DELAY_MIN) {
+      enemies_move_delay = ENEMY_MOVEMENT_DELAY_MIN;
     } else {
-      enemies_move_delay -= enemy_stage * enemies_move_delay_decrease;
+      enemies_move_delay -= enemies_move_delay_decrease;
     }
     createEnemies();
   }
@@ -228,6 +227,7 @@ void update_enemies() {
         enemies[i].location[1] = enemies[i].location[1] + movement_y;
 
         move_sprite(enemies[i].sprite_index, enemies[i].location[0], enemies[i].location[1]);
+        set_sound(SOUND_ENEMIES_MOVE);
       }
 
       // Prepare for enemy movement next frame.
@@ -252,8 +252,8 @@ void update_enemies() {
     enemy_movement_timer = 0;
     if (enemies_move_down) {
       enemies_move_down = false;
-      if (enemies_move_delay <= enemies_move_delay_decrease) {
-        enemies_move_delay = 1;
+      if (enemies_move_delay - enemies_move_delay_decrease <= ENEMY_MOVEMENT_DELAY_MIN) {
+        enemies_move_delay = ENEMY_MOVEMENT_DELAY_MIN;
       } else {
         enemies_move_delay -= enemies_move_delay_decrease;
       }
@@ -310,7 +310,7 @@ void init_game() {
   SHOW_SPRITES;
   SHOW_WIN;
 
-  set_music(MUSIC_INTRO);
+  set_music(MUSIC_STAGE1);
 
   score = MAKE_BCD(0);
 
@@ -379,7 +379,8 @@ void run_game() {
   update_controls();  
 
   // If music and/or sound are set, play them.
-  play_music();
+  // play_music();
+  stop_music();
   play_sound();
 
   // Update everything for the player.

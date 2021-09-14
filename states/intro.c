@@ -20,5 +20,8 @@ void run_intro() {
     game_state = STATE_GAME;
   }
 
+  // If music is set, play it.
+  play_music();
+
   wait_vbl_done();
 }

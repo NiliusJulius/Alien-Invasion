@@ -4,6 +4,7 @@
 #include <gb/gb.h>
 #include <stdbool.h>
 #include "sound.h"
+#include "../globals.h"
 
 enum notes
 {
@@ -29,7 +30,10 @@ const uint16_t frequency[] =
 
 const unsigned char music_intro_lead[] =
 {
+  36,C5,4,BRK,36,Db5,4,BRK,36,F5,4,BRK,36,D5,4,BRK,36,F5,4,BRK,36,B4,4,BRK,36,Gb5,4,BRK,36,Ab5,4,BRK,
+  25,C5,3,BRK,25,Db5,3,BRK,25,F5,3,BRK,25,D5,3,BRK,25,F5,3,BRK,25,B4,3,BRK,25,Gb5,3,BRK,25,Ab5,3,BRK,
 	18,C5,2,BRK,18,Db5,2,BRK,18,F5,2,BRK,18,D5,2,BRK,18,F5,2,BRK,18,B4,2,BRK,18,Gb5,2,BRK,18,Ab5,2,BRK,
+  // 9,C5,1,BRK,9,Db5,1,BRK,9,F5,1,BRK,9,D5,1,BRK,9,F5,1,BRK,9,B4,1,BRK,9,Gb5,1,BRK,9,Ab5,1,BRK,
 	// 18,D5,2,BRK,18,G4,2,BRK,18,D5,2,BRK,18,G4,2,BRK,18,E5,2,BRK,18,G4,2,BRK,18,D5,2,BRK,18,G4,2,BRK,
 	// 18,C5,2,BRK,18,F4,2,BRK,18,C5,2,BRK,18,F4,2,BRK,18,D5,2,BRK,18,F4,2,BRK,18,C5,2,BRK,18,F4,2,BRK,
 	// 18,B4,2,BRK,18,E4,2,BRK,18,B4,2,BRK,18,E4,2,BRK,18,C5,2,BRK,18,E4,2,BRK,18,D5,2,BRK,18,E4,2,BRK,
@@ -38,13 +42,42 @@ const unsigned char music_intro_lead[] =
 
 const unsigned char music_intro_bass[] =
 {
+  // 76,A3,4,BRK,76,G3,4,BRK,76,F3,4,BRK,76,E3,4,BRK,
 	38,A3,2,BRK,38,G3,2,BRK,38,F3,2,BRK,38,E3,2,BRK,
+  38,A3,2,BRK,38,G3,2,BRK,38,F3,2,BRK,38,E3,2,BRK,
+  26,A3,2,BRK,26,G3,2,BRK,26,F3,2,BRK,26,E3,2,BRK,
+  26,A3,2,BRK,26,G3,2,BRK,26,F3,2,BRK,26,E3,2,BRK,
+  19,A3,1,BRK,19,G3,1,BRK,19,F3,1,BRK,19,E3,1,BRK,
+  19,A3,1,BRK,19,G3,1,BRK,19,F3,1,BRK,19,E3,1,BRK,
 	0
 };
 
 const unsigned char music_intro_rythm[] =
 {
+  2,0x4D,2,0x4F,76,0x00,2,0x4B,2,0x58,76,0x00,2,0x4B,2,0x58,76,0x00,2,0x4B,2,0x58,76,0x00,
+  2,0x4D,2,0x4F,52,0x00,2,0x4B,2,0x58,52,0x00,2,0x4B,2,0x58,52,0x00,2,0x4B,2,0x58,52,0x00,
 	1,0x4D,1,0x4F,38,0x00,1,0x4B,1,0x58,38,0x00,1,0x4B,1,0x58,38,0x00,1,0x4B,1,0x58,38,0x00,
+  // 1,0x4D,19,0x00,1,0x4B,19,0x00,1,0x4B,19,0x00,1,0x4B,19,0x00,
+	0
+};
+
+const unsigned char music_stage1_lead[] =
+{
+  ENEMY_MOVEMENT_DELAY-12,Db5,13,BRK,
+	0
+};
+
+const unsigned char music_stage1_bass[] =
+{
+  // 76,A3,4,BRK,76,G3,4,BRK,76,F3,4,BRK,76,E3,4,BRK,
+	ENEMY_MOVEMENT_DELAY-10,G3,11,BRK,
+	0
+};
+
+const unsigned char music_stage1_rythm[] =
+{
+  2,0x4D,2,0x4F,ENEMY_MOVEMENT_DELAY-3,0x00,
+  // 1,0x4D,19,0x00,1,0x4B,19,0x00,1,0x4B,19,0x00,1,0x4B,19,0x00,
 	0
 };
 
@@ -115,6 +148,27 @@ void set_music(uint8_t song) {
 			music_ptr_ch4 = music_data_ch4;
 			music_cnt_ch4 = 0;
 			break;
+    case MUSIC_STAGE1:
+			music_data_ch1 = music_stage1_lead;
+			music_ptr_ch1 = music_data_ch1;
+			music_cnt_ch1 = 0;
+			inst_ch1 = 0x80;
+			vol_ch1 = 0x92;
+						
+			music_data_ch2 =music_stage1_lead;
+			music_ptr_ch2 = music_data_ch2;
+			music_cnt_ch2 = 0;
+			inst_ch2 = 0x00;
+			vol_ch2 = 0x70;
+
+			music_data_ch3 = music_stage1_bass;
+			music_ptr_ch3 = music_data_ch3;
+			music_cnt_ch3 = 0;
+			
+			music_data_ch4 = music_stage1_rythm;
+			music_ptr_ch4 = music_data_ch4;
+			music_cnt_ch4 = 0;
+			break;
 	}
 }
 
@@ -158,7 +212,7 @@ void play_music() {
 			music_ptr_ch2++;
 			freq = frequency[*music_ptr_ch2];
 			music_ptr_ch2++;
-			
+      
 			if (freq == 0) {
 				NR21_REG = 0;
 				NR22_REG = 0;
@@ -183,7 +237,7 @@ void play_music() {
 			music_ptr_ch3++;
 			freq = frequency[*music_ptr_ch3];
 			music_ptr_ch3++;
-			
+
 			if (freq == 0) {
 				NR30_REG = 0;
 				NR31_REG = 0;
@@ -210,6 +264,7 @@ void play_music() {
 			music_ptr_ch4++;
 			cwd = *music_ptr_ch4;
 			music_ptr_ch4++;
+      
 			if (sound_cnt_ch4 == 0) {
 				if (cwd == 0) {
 					NR41_REG = 0;
