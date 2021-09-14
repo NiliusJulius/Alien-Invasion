@@ -11,6 +11,8 @@
 #include "..\sprites\explosion_sprites.h"
 #include "..\sprites\multiple_enemy_sprites.h"
 
+uint8_t next_wave_timer = 0;
+
 void animate_player() {
   uint8_t current_frame;
   if (player.time_since_animation_start >= player.sprite_count * PLAYER_ANIM_SPEED) {
@@ -121,13 +123,18 @@ void createEnemies() {
 
 void update_enemies() {
   if (enemies_remaining == 0) {
-    enemy_stage += 1;
-    if (enemies_move_delay - enemies_move_delay_decrease <= ENEMY_MOVEMENT_DELAY_MIN) {
-      enemies_move_delay = ENEMY_MOVEMENT_DELAY_MIN;
+    if (next_wave_timer < 10) {
+      next_wave_timer++;
     } else {
-      enemies_move_delay -= enemies_move_delay_decrease;
+      next_wave_timer = 0;
+      enemy_stage += 1;
+      if (enemies_move_delay - enemies_move_delay_decrease <= ENEMY_MOVEMENT_DELAY_MIN) {
+        enemies_move_delay = ENEMY_MOVEMENT_DELAY_MIN;
+      } else {
+        enemies_move_delay -= enemies_move_delay_decrease;
+      }
+      createEnemies();
     }
-    createEnemies();
   }
   if (enemy_movement_timer == enemies_move_delay) {
 
