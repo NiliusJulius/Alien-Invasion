@@ -25,12 +25,14 @@
 #define SPRITE_WIDTH 8
 #define SPRITE_HEIGHT 16
 #define HALF_SPRITE_HEIGHT SPRITE_HEIGHT / 2
+#define HALF_SCREEN_WIDTH 80
 
 // Because we are running in 8x16 sprite mode, all tile indexes should be multiplied by 2.
 #define TILE_INDEX_MULTIPLIER 2
 
 #define ENEMY_GROUPS_COUNT 2
-#define ENEMY_ARRAY_LENGTH 24
+#define ENEMY_ARRAY_LENGTH 21
+#define ENEMIES_PER_ROW 7
 #define ENEMY_MOVEMENT_DELAY 48
 #define ENEMY_MOVEMENT_DELAY_DECREASE 1
 #define ENEMY_MOVEMENT_DELAY_MIN 5
@@ -50,6 +52,9 @@ extern explosion_t explosion;
 extern uint8_t enemies_remaining;
 extern uint8_t enemy_movement_timer;
 extern uint8_t enemy_stage;
+extern uint8_t enemies_left[24];
+extern uint8_t enemies_right[24];
+extern uint8_t next_wave_timer;
 
 // Used to determine movement for next turn.
 extern uint8_t cur_leftmost_enemy_x;

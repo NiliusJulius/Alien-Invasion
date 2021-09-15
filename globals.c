@@ -19,6 +19,9 @@ explosion_t explosion;
 uint8_t enemies_remaining;
 uint8_t enemy_movement_timer;
 uint8_t enemy_stage;
+uint8_t enemies_left[24];
+uint8_t enemies_right[24];
+uint8_t next_wave_timer;
 
 // Used to determine movement for next turn.
 uint8_t cur_leftmost_enemy_x;
