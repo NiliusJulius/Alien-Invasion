@@ -30,6 +30,8 @@ uint8_t cur_rightmost_enemy_x;
 uint8_t prev_rightmost_enemy_x;
 uint8_t prev_leftmost_enemy_x;
 
+uint8_t lowest_enemy_y;
+
 // Movement for this turn.
 int8_t movement_x;
 int8_t movement_y;

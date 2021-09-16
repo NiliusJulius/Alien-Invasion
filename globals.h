@@ -63,6 +63,8 @@ extern uint8_t cur_rightmost_enemy_x;
 extern uint8_t prev_rightmost_enemy_x;
 extern uint8_t prev_leftmost_enemy_x;
 
+extern uint8_t lowest_enemy_y;
+
 // Movement for this turn.
 extern int8_t movement_x;
 extern int8_t movement_y;

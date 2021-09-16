@@ -74,7 +74,7 @@ void createEnemies() {
   for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
     enemy->sprite_index = 15 + i;
     enemy->location[0] = 36 + SPRITE_WIDTH * 2 * (i % ENEMIES_PER_ROW);
-    enemy->location[1] = 30 + SPRITE_HEIGHT * (i / ENEMIES_PER_ROW);
+    enemy->location[1] = 94 + SPRITE_HEIGHT * (i / ENEMIES_PER_ROW);
     enemy->destroyed = false;
     enemy->value = MAKE_BCD(100);
     move_sprite(enemy->sprite_index, enemy->location[0], enemy->location[1]);
@@ -127,6 +127,7 @@ void createEnemies() {
   }
   prev_leftmost_enemy_x = enemies[0].location[0];
   prev_rightmost_enemy_x = enemies[ENEMY_ARRAY_LENGTH - 1].location[0] + SPRITE_WIDTH;
+  lowest_enemy_y = 0;
 }
 
 void update_enemies() {
@@ -261,8 +262,6 @@ void update_enemies() {
           enemies_right[i] = 1;
         }
 
-        set_sound(SOUND_ENEMIES_MOVE);
-
         // We can continue to the next loop since the next condition will never be true if we get here.
         // This saves about 1% cpu time.
         continue;
@@ -277,16 +276,39 @@ void update_enemies() {
         if (enemies[i].location[0] + SPRITE_WIDTH > cur_rightmost_enemy_x) {
           cur_rightmost_enemy_x = enemies[i].location[0] + SPRITE_WIDTH;
         }
+
+        // Determine the lower y coordinate of the lowest enemy on screen.
+        if (enemies[i].bottom_enemy) {
+          if (enemies[i].location[1] + SPRITE_HEIGHT > lowest_enemy_y) {
+            lowest_enemy_y = enemies[i].location[1] + SPRITE_HEIGHT;
+          }
+        } else {
+          if (enemies[i].location[1] + (SPRITE_HEIGHT / 2) > lowest_enemy_y) {
+            lowest_enemy_y = enemies[i].location[1] + (SPRITE_HEIGHT / 2);
+          }
+        }
+
       }
     }
   }
+
   if (enemy_movement_timer == enemies_move_delay - 1) {
     prev_rightmost_enemy_x = cur_rightmost_enemy_x;
     prev_leftmost_enemy_x = cur_leftmost_enemy_x;
     cur_leftmost_enemy_x = 255;
     cur_rightmost_enemy_x = 0;
   }
+
   if (enemy_movement_timer == enemies_move_delay) {
+
+    // Lose condition when an enemy reaches the height of the player
+    if (lowest_enemy_y >= 144) {
+      // Temporary loss placeholder.
+      player.location[0] = 0;
+      player.location[1] = 0;
+      move_sprite(player.sprite_index, 0, 0);
+    }
+
     enemy_movement_timer = 0;
     if (enemies_move_down) {
       enemies_move_down = false;
@@ -296,6 +318,8 @@ void update_enemies() {
         enemies_move_delay -= enemies_move_delay_decrease;
       }
     }
+    
+    set_sound(SOUND_ENEMIES_MOVE);
   } else {
     enemy_movement_timer++;
   }
@@ -325,7 +349,7 @@ void update_controls() {
       }
     }
     if (KEY_DEBOUNCE(J_RIGHT)) {
-      if (player.location[0] + SPRITE_WIDTH + 1 <= 168) {
+      if (player.location[0] + SPRITE_WIDTH * 2 + 1 <= 168) {
         player.location[0]++;
         move_player();
         player.can_move = false;
@@ -362,6 +386,7 @@ void init_game() {
   next_wave_timer = 0;
   cur_leftmost_enemy_x = 255;
   cur_rightmost_enemy_x = 0;
+  lowest_enemy_y = 0;
   movement_x = 0;
   movement_y = 0;
   enemies_move_left = false;
