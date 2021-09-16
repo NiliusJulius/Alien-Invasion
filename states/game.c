@@ -74,7 +74,7 @@ void createEnemies() {
   for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
     enemy->sprite_index = 15 + i;
     enemy->location[0] = 36 + SPRITE_WIDTH * 2 * (i % ENEMIES_PER_ROW);
-    enemy->location[1] = 94 + SPRITE_HEIGHT * (i / ENEMIES_PER_ROW);
+    enemy->location[1] = 30 + SPRITE_HEIGHT * (i / ENEMIES_PER_ROW);
     enemy->destroyed = false;
     enemy->value = MAKE_BCD(100);
     move_sprite(enemy->sprite_index, enemy->location[0], enemy->location[1]);
