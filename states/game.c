@@ -130,51 +130,12 @@ void createEnemies() {
   lowest_enemy_y = 0;
 }
 
-void update_enemies() {
-  if (enemies_remaining == 0) {
-    if (next_wave_timer < 10) {
-      next_wave_timer++;
-    } else {
-      next_wave_timer = 0;
-      enemy_stage += 1;
-      if (enemies_move_delay - enemies_move_delay_decrease <= ENEMY_MOVEMENT_DELAY_MIN) {
-        enemies_move_delay = ENEMY_MOVEMENT_DELAY_MIN;
-      } else {
-        enemies_move_delay -= enemies_move_delay_decrease;
-      }
-      createEnemies();
-    }
-  }
-  if (enemy_movement_timer == enemies_move_delay) {
-
-    // Determine movement for this turn.
-    if (enemies_move_left) {
-      if (prev_leftmost_enemy_x - 1 < 8) {
-        movement_x = 0;
-        movement_y = 4;
-        enemies_move_down = true;
-        enemies_move_left = false;
-      } else {
-        movement_x = -1;
-        movement_y = 0;
-      }
-    } else {
-      if (prev_rightmost_enemy_x + 1 > 168) {
-        movement_x = 0;
-        movement_y = 4;
-        enemies_move_down = true;
-        enemies_move_left = true;
-      } else {
-        movement_x = 1;
-        movement_y = 0;
-      }
-    }
-  }
-
+void prepare_move_enemies() {
   for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
     // Already destroyed enemies don't need updating.
     if (!enemies[i].destroyed) {
-
+      
+      // Collision checking. This code is copied 4 times, since this approach saves us about 25% cpu time.
       // Only check if the bullet is on screen.
       if (player_bullet.location[1] + SPRITE_HEIGHT > 16) {
         if ((player_bullet.location[0] < HALF_SCREEN_WIDTH && enemies_left[i] == 1) || (player_bullet.location[0] >= HALF_SCREEN_WIDTH && enemies_right[i] == 1)) {
@@ -243,64 +204,338 @@ void update_enemies() {
         continue;
       }
 
-      // Enemy movement.
-      if (enemy_movement_timer == enemies_move_delay) {
-
-        enemies[i].location[0] = enemies[i].location[0] + movement_x;
-        enemies[i].location[1] = enemies[i].location[1] + movement_y;
-
-        move_sprite(enemies[i].sprite_index, enemies[i].location[0], enemies[i].location[1]);
-
-        // Determine if we are going to move from one half of the screen to the other.
-        // Since all enemies always move by 1 pixel we can simply check for the dividing line.
-        // For performance reasons we just update the left and right array whenever an enemy gets to the line.
-        if (enemies[i].location[0] == (HALF_SCREEN_WIDTH - 1)) {
-          enemies_left[i] = 1;
-          enemies_right[i] = 0;
-        } else if (enemies[i].location[0] == HALF_SCREEN_WIDTH) {
-          enemies_left[i] = 0;
-          enemies_right[i] = 1;
-        }
-
-        // We can continue to the next loop since the next condition will never be true if we get here.
-        // This saves about 1% cpu time.
-        continue;
-      }
-
       // Prepare for enemy movement next frame.
-      if (enemy_movement_timer == enemies_move_delay - 1) {
-        if (enemies[i].location[0] < cur_leftmost_enemy_x) {
-          cur_leftmost_enemy_x = enemies[i].location[0];
-        }
-
-        if (enemies[i].location[0] + SPRITE_WIDTH > cur_rightmost_enemy_x) {
-          cur_rightmost_enemy_x = enemies[i].location[0] + SPRITE_WIDTH;
-        }
-
-        // Determine the lower y coordinate of the lowest enemy on screen.
-        if (enemies[i].bottom_enemy) {
-          if (enemies[i].location[1] + SPRITE_HEIGHT > lowest_enemy_y) {
-            lowest_enemy_y = enemies[i].location[1] + SPRITE_HEIGHT;
-          }
-        } else {
-          if (enemies[i].location[1] + (SPRITE_HEIGHT / 2) > lowest_enemy_y) {
-            lowest_enemy_y = enemies[i].location[1] + (SPRITE_HEIGHT / 2);
-          }
-        }
-
+      if (enemies[i].location[0] < cur_leftmost_enemy_x) {
+        cur_leftmost_enemy_x = enemies[i].location[0];
       }
+
+      if (enemies[i].location[0] + SPRITE_WIDTH > cur_rightmost_enemy_x) {
+        cur_rightmost_enemy_x = enemies[i].location[0] + SPRITE_WIDTH;
+      }
+
     }
   }
 
-  if (enemy_movement_timer == enemies_move_delay - 1) {
-    prev_rightmost_enemy_x = cur_rightmost_enemy_x;
-    prev_leftmost_enemy_x = cur_leftmost_enemy_x;
-    cur_leftmost_enemy_x = 255;
-    cur_rightmost_enemy_x = 0;
+  prev_rightmost_enemy_x = cur_rightmost_enemy_x;
+  prev_leftmost_enemy_x = cur_leftmost_enemy_x;
+  cur_leftmost_enemy_x = 255;
+  cur_rightmost_enemy_x = 0;
+}
+
+void move_enemies() {
+  // Determine movement for this turn.
+  if (enemies_move_left) {
+    if (prev_leftmost_enemy_x - 1 < 8) {
+      movement_x = 0;
+      movement_y = 4;
+      enemies_move_down = true;
+      enemies_move_left = false;
+    } else {
+      movement_x = -1;
+      movement_y = 0;
+    }
+  } else {
+    if (prev_rightmost_enemy_x + 1 > 168) {
+      movement_x = 0;
+      movement_y = 4;
+      enemies_move_down = true;
+      enemies_move_left = true;
+    } else {
+      movement_x = 1;
+      movement_y = 0;
+    }
   }
 
-  if (enemy_movement_timer == enemies_move_delay) {
+  for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
+    // Already destroyed enemies don't need updating.
+    if (!enemies[i].destroyed) {
+      
+      // Collision checking. This code is copied 4 times, since this approach saves us about 25% cpu time.
+      // Only check if the bullet is on screen.
+      if (player_bullet.location[1] + SPRITE_HEIGHT > 16) {
+        if ((player_bullet.location[0] < HALF_SCREEN_WIDTH && enemies_left[i] == 1) || (player_bullet.location[0] >= HALF_SCREEN_WIDTH && enemies_right[i] == 1)) {
+          // Check whether the enemy is being hit by the player's bullet.
+          if (player_bullet.location[0] + player_bullet.sprite_left_offset < enemies[i].location[0] + enemies[i].sprite_right_offset + SPRITE_WIDTH &&
+                  player_bullet.location[0] - player_bullet.sprite_right_offset + SPRITE_WIDTH > enemies[i].location[0] - enemies[i].sprite_left_offset &&
+                  player_bullet.location[1] + player_bullet.sprite_top_offset < enemies[i].location[1] - enemies[i].sprite_bottom_offset + SPRITE_HEIGHT &&
+                  player_bullet.location[1] - player_bullet.sprite_bottom_offset + SPRITE_HEIGHT > enemies[i].location[1] + enemies[i].sprite_top_offset
+          ) {
+            // Set the explosion x location first, since we will move the destroyed enemies.
+            explosion.location[0] = enemies[i].location[0];
 
+            // Play explosion sound.
+            set_sound(SOUND_EXPLOSION);
+
+            // Top enemy hit.
+            if (enemies[i].top_enemy && (player_bullet.location[1] + player_bullet.sprite_top_offset <= enemies[i].location[1] + HALF_SPRITE_HEIGHT)) {
+              explosion.location[1] = enemies[i].location[1] + movement_y;
+              // If the bottom enemy still exists, we update to only show that one.
+              if (enemies[i].bottom_enemy) {
+                enemies[i].top_enemy = false;
+                enemies[i].sprite_top_offset = enemies[i].sprite_top_offset + 8;
+                set_sprite_tile(enemies[i].sprite_index, ENEMY_MULTI_TILE_INDEX + 4);
+              } else {
+                // Enemy is totally destroyed.
+                enemies[i].destroyed = true;
+                enemies[i].location[0] = 0;
+                enemies[i].location[1] = 0;
+              }
+            } else {
+              // Bottom enemy hit.
+              explosion.location[1] = enemies[i].location[1] + HALF_SPRITE_HEIGHT + movement_y;
+              // If the top enemy still exists, we update to only show that one.
+              if (enemies[i].top_enemy) {
+                enemies[i].bottom_enemy = false;
+                enemies[i].sprite_bottom_offset = enemies[i].sprite_bottom_offset + 8;
+                set_sprite_tile(enemies[i].sprite_index, ENEMY_MULTI_TILE_INDEX + 2);
+              } else {
+                // Enemy is totally destroyed.
+                enemies[i].destroyed = true;
+                enemies[i].location[0] = 0;
+                enemies[i].location[1] = 0;
+              }
+            }
+
+            // Update the explosion to show on the enemies location.
+            explosion.time_since_animation_start = 0;
+            move_sprite(explosion.sprite_index, explosion.location[0], explosion.location[1]);
+            explosion.is_on_screen = true;
+
+            // Destroy the player's bullet.
+            player_bullet.location[0] = 0;
+            player_bullet.location[1] = 0;
+            move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
+
+            // Update the score and enemy count.
+            bcd_add(&score, &enemies[i].value);
+            enemies_remaining -= 1;
+          }
+        }
+      }
+
+      // If the enemy is now destroyed, move it off screen and continue.
+      if (enemies[i].destroyed) {
+        move_sprite(enemies[i].sprite_index, 0, 0);
+        continue;
+      }
+
+      // Move the enemy.
+      enemies[i].location[0] = enemies[i].location[0] + movement_x;
+      enemies[i].location[1] = enemies[i].location[1] + movement_y;
+
+      move_sprite(enemies[i].sprite_index, enemies[i].location[0], enemies[i].location[1]);
+
+      // Determine if we are going to move from one half of the screen to the other.
+      // Since all enemies always move by 1 pixel we can simply check for the dividing line.
+      // For performance reasons we just update the left and right array whenever an enemy gets to the line.
+      if (enemies[i].location[0] == (HALF_SCREEN_WIDTH - 1)) {
+        enemies_left[i] = 1;
+        enemies_right[i] = 0;
+      } else if (enemies[i].location[0] == HALF_SCREEN_WIDTH) {
+        enemies_left[i] = 0;
+        enemies_right[i] = 1;
+      }
+
+    }
+  }
+
+  if (enemies_move_down) {
+    enemies_move_down = false;
+    if (enemies_move_delay - enemies_move_delay_decrease <= ENEMY_MOVEMENT_DELAY_MIN) {
+      enemies_move_delay = ENEMY_MOVEMENT_DELAY_MIN;
+    } else {
+      enemies_move_delay -= enemies_move_delay_decrease;
+    }
+  }
+  
+  set_sound(SOUND_ENEMIES_MOVE);
+}
+
+void after_move_enemies() {
+  for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
+    // Already destroyed enemies don't need updating.
+    if (!enemies[i].destroyed) {
+      
+      // Collision checking. This code is copied 4 times, since this approach saves us about 25% cpu time.
+      // Only check if the bullet is on screen.
+      if (player_bullet.location[1] + SPRITE_HEIGHT > 16) {
+        if ((player_bullet.location[0] < HALF_SCREEN_WIDTH && enemies_left[i] == 1) || (player_bullet.location[0] >= HALF_SCREEN_WIDTH && enemies_right[i] == 1)) {
+          // Check whether the enemy is being hit by the player's bullet.
+          if (player_bullet.location[0] + player_bullet.sprite_left_offset < enemies[i].location[0] + enemies[i].sprite_right_offset + SPRITE_WIDTH &&
+                  player_bullet.location[0] - player_bullet.sprite_right_offset + SPRITE_WIDTH > enemies[i].location[0] - enemies[i].sprite_left_offset &&
+                  player_bullet.location[1] + player_bullet.sprite_top_offset < enemies[i].location[1] - enemies[i].sprite_bottom_offset + SPRITE_HEIGHT &&
+                  player_bullet.location[1] - player_bullet.sprite_bottom_offset + SPRITE_HEIGHT > enemies[i].location[1] + enemies[i].sprite_top_offset
+          ) {
+            // Set the explosion x location first, since we will move the destroyed enemies.
+            explosion.location[0] = enemies[i].location[0];
+
+            // Play explosion sound.
+            set_sound(SOUND_EXPLOSION);
+
+            // Top enemy hit.
+            if (enemies[i].top_enemy && (player_bullet.location[1] + player_bullet.sprite_top_offset <= enemies[i].location[1] + HALF_SPRITE_HEIGHT)) {
+              explosion.location[1] = enemies[i].location[1] + movement_y;
+              // If the bottom enemy still exists, we update to only show that one.
+              if (enemies[i].bottom_enemy) {
+                enemies[i].top_enemy = false;
+                enemies[i].sprite_top_offset = enemies[i].sprite_top_offset + 8;
+                set_sprite_tile(enemies[i].sprite_index, ENEMY_MULTI_TILE_INDEX + 4);
+              } else {
+                // Enemy is totally destroyed.
+                enemies[i].destroyed = true;
+                enemies[i].location[0] = 0;
+                enemies[i].location[1] = 0;
+              }
+            } else {
+              // Bottom enemy hit.
+              explosion.location[1] = enemies[i].location[1] + HALF_SPRITE_HEIGHT + movement_y;
+              // If the top enemy still exists, we update to only show that one.
+              if (enemies[i].top_enemy) {
+                enemies[i].bottom_enemy = false;
+                enemies[i].sprite_bottom_offset = enemies[i].sprite_bottom_offset + 8;
+                set_sprite_tile(enemies[i].sprite_index, ENEMY_MULTI_TILE_INDEX + 2);
+              } else {
+                // Enemy is totally destroyed.
+                enemies[i].destroyed = true;
+                enemies[i].location[0] = 0;
+                enemies[i].location[1] = 0;
+              }
+            }
+
+            // Update the explosion to show on the enemies location.
+            explosion.time_since_animation_start = 0;
+            move_sprite(explosion.sprite_index, explosion.location[0], explosion.location[1]);
+            explosion.is_on_screen = true;
+
+            // Destroy the player's bullet.
+            player_bullet.location[0] = 0;
+            player_bullet.location[1] = 0;
+            move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
+
+            // Update the score and enemy count.
+            bcd_add(&score, &enemies[i].value);
+            enemies_remaining -= 1;
+          }
+        }
+      }
+
+      // If the enemy is now destroyed, move it off screen and continue.
+      if (enemies[i].destroyed) {
+        move_sprite(enemies[i].sprite_index, 0, 0);
+        continue;
+      }
+
+      // We do this right after moving, in order to spread the cpu load.
+      // Determine the lower y coordinate of the lowest enemy on screen.
+      if (enemies[i].bottom_enemy) {
+        if (enemies[i].location[1] + SPRITE_HEIGHT > lowest_enemy_y) {
+          lowest_enemy_y = enemies[i].location[1] + SPRITE_HEIGHT;
+        }
+      } else {
+        if (enemies[i].location[1] + (SPRITE_HEIGHT / 2) > lowest_enemy_y) {
+          lowest_enemy_y = enemies[i].location[1] + (SPRITE_HEIGHT / 2);
+        }
+      }
+
+    }
+  }
+}
+
+void regular_enemies_update() {
+    for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
+    // Already destroyed enemies don't need updating.
+    if (!enemies[i].destroyed) {
+      
+      // Collision checking. This code is copied 4 times, since this approach saves us about 25% cpu time.
+      // Only check if the bullet is on screen.
+      if (player_bullet.location[1] + SPRITE_HEIGHT > 16) {
+        if ((player_bullet.location[0] < HALF_SCREEN_WIDTH && enemies_left[i] == 1) || (player_bullet.location[0] >= HALF_SCREEN_WIDTH && enemies_right[i] == 1)) {
+          // Check whether the enemy is being hit by the player's bullet.
+          if (player_bullet.location[0] + player_bullet.sprite_left_offset < enemies[i].location[0] + enemies[i].sprite_right_offset + SPRITE_WIDTH &&
+                  player_bullet.location[0] - player_bullet.sprite_right_offset + SPRITE_WIDTH > enemies[i].location[0] - enemies[i].sprite_left_offset &&
+                  player_bullet.location[1] + player_bullet.sprite_top_offset < enemies[i].location[1] - enemies[i].sprite_bottom_offset + SPRITE_HEIGHT &&
+                  player_bullet.location[1] - player_bullet.sprite_bottom_offset + SPRITE_HEIGHT > enemies[i].location[1] + enemies[i].sprite_top_offset
+          ) {
+            // Set the explosion x location first, since we will move the destroyed enemies.
+            explosion.location[0] = enemies[i].location[0];
+
+            // Play explosion sound.
+            set_sound(SOUND_EXPLOSION);
+
+            // Top enemy hit.
+            if (enemies[i].top_enemy && (player_bullet.location[1] + player_bullet.sprite_top_offset <= enemies[i].location[1] + HALF_SPRITE_HEIGHT)) {
+              explosion.location[1] = enemies[i].location[1] + movement_y;
+              // If the bottom enemy still exists, we update to only show that one.
+              if (enemies[i].bottom_enemy) {
+                enemies[i].top_enemy = false;
+                enemies[i].sprite_top_offset = enemies[i].sprite_top_offset + 8;
+                set_sprite_tile(enemies[i].sprite_index, ENEMY_MULTI_TILE_INDEX + 4);
+              } else {
+                // Enemy is totally destroyed.
+                enemies[i].destroyed = true;
+                enemies[i].location[0] = 0;
+                enemies[i].location[1] = 0;
+              }
+            } else {
+              // Bottom enemy hit.
+              explosion.location[1] = enemies[i].location[1] + HALF_SPRITE_HEIGHT + movement_y;
+              // If the top enemy still exists, we update to only show that one.
+              if (enemies[i].top_enemy) {
+                enemies[i].bottom_enemy = false;
+                enemies[i].sprite_bottom_offset = enemies[i].sprite_bottom_offset + 8;
+                set_sprite_tile(enemies[i].sprite_index, ENEMY_MULTI_TILE_INDEX + 2);
+              } else {
+                // Enemy is totally destroyed.
+                enemies[i].destroyed = true;
+                enemies[i].location[0] = 0;
+                enemies[i].location[1] = 0;
+              }
+            }
+
+            // Update the explosion to show on the enemies location.
+            explosion.time_since_animation_start = 0;
+            move_sprite(explosion.sprite_index, explosion.location[0], explosion.location[1]);
+            explosion.is_on_screen = true;
+
+            // Destroy the player's bullet.
+            player_bullet.location[0] = 0;
+            player_bullet.location[1] = 0;
+            move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
+
+            // Update the score and enemy count.
+            bcd_add(&score, &enemies[i].value);
+            enemies_remaining -= 1;
+          }
+        }
+      }
+
+      // If the enemy is now destroyed, move it off screen and continue.
+      if (enemies[i].destroyed) {
+        move_sprite(enemies[i].sprite_index, 0, 0);
+        continue;
+      }
+
+    }
+  }
+}
+
+void update_enemies() {
+  if (enemies_remaining == 0) {
+    if (next_wave_timer < 10) {
+      next_wave_timer++;
+    } else {
+      next_wave_timer = 0;
+      enemy_stage += 1;
+      if (enemies_move_delay - enemies_move_delay_decrease <= ENEMY_MOVEMENT_DELAY_MIN) {
+        enemies_move_delay = ENEMY_MOVEMENT_DELAY_MIN;
+      } else {
+        enemies_move_delay -= enemies_move_delay_decrease;
+      }
+      createEnemies();
+    }
+  }
+
+  if (enemy_movement_timer == 0) {
     // Lose condition when an enemy reaches the height of the player
     if (lowest_enemy_y >= 144) {
       // Temporary loss placeholder.
@@ -308,19 +543,19 @@ void update_enemies() {
       player.location[1] = 0;
       move_sprite(player.sprite_index, 0, 0);
     }
+  }
 
+  if (enemy_movement_timer == enemies_move_delay - 1) {
+    prepare_move_enemies();
+    enemy_movement_timer++;
+  } else if (enemy_movement_timer == 0) {
+    after_move_enemies();
+    enemy_movement_timer++;
+  } else if (enemy_movement_timer == enemies_move_delay) {
+    move_enemies();
     enemy_movement_timer = 0;
-    if (enemies_move_down) {
-      enemies_move_down = false;
-      if (enemies_move_delay - enemies_move_delay_decrease <= ENEMY_MOVEMENT_DELAY_MIN) {
-        enemies_move_delay = ENEMY_MOVEMENT_DELAY_MIN;
-      } else {
-        enemies_move_delay -= enemies_move_delay_decrease;
-      }
-    }
-    
-    set_sound(SOUND_ENEMIES_MOVE);
   } else {
+    regular_enemies_update();
     enemy_movement_timer++;
   }
 }
