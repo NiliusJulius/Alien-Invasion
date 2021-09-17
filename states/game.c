@@ -24,13 +24,13 @@ void animate_player() {
   }
 
   set_sprite_tile(player.sprite_index, current_frame * TILE_INDEX_MULTIPLIER);
-  set_sprite_tile(player.sprite_index + 2, current_frame * TILE_INDEX_MULTIPLIER);
+  set_sprite_tile(player.sprite_index + 1, current_frame * TILE_INDEX_MULTIPLIER);
   player.time_since_animation_start = player.time_since_animation_start + 1;
 }
 
 void move_player() {
   move_sprite(player.sprite_index, player.location[0], player.location[1]);
-  move_sprite(player.sprite_index + 2, player.location[0] + SPRITE_WIDTH, player.location[1]);
+  move_sprite(player.sprite_index + 1, player.location[0] + SPRITE_WIDTH, player.location[1]);
 }
 
 void update_explosion() {
@@ -442,7 +442,7 @@ void after_move_enemies() {
 }
 
 void regular_enemies_update() {
-    for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
+  for (uint8_t i=0; i<ENEMY_ARRAY_LENGTH; i++) {
     // Already destroyed enemies don't need updating.
     if (!enemies[i].destroyed) {
       
@@ -509,10 +509,9 @@ void regular_enemies_update() {
         }
       }
 
-      // If the enemy is now destroyed, move it off screen and continue.
+      // If the enemy is now destroyed, move it off screen.
       if (enemies[i].destroyed) {
         move_sprite(enemies[i].sprite_index, 0, 0);
-        continue;
       }
 
     }
@@ -641,12 +640,12 @@ void init_game() {
   player.can_shoot = true;
   // Set player sprite data.
   set_sprite_data(PLAYER_TILE_INDEX, player.sprite_count * 2, player_sprites);
-  set_sprite_prop(player.sprite_index + 2, S_FLIPX);
+  set_sprite_prop(player.sprite_index + 1, S_FLIPX);
   move_player();
 
   // Set initial values of the player bullet instance.
   player_bullet.sprite_count = 1;
-  player_bullet.sprite_index = 1;
+  player_bullet.sprite_index = 2;
   player_bullet.location[0] = 0;
   player_bullet.location[1] = 0;
   player_bullet.speed = 3;
