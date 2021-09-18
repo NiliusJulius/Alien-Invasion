@@ -11,6 +11,8 @@ uint8_t game_state;
 
 BCD score;
 
+uint8_t seed;
+
 player_t player;
 bullet_t player_bullet;
 enemy_t enemies[ENEMY_ARRAY_LENGTH];
@@ -22,6 +24,10 @@ uint8_t enemy_stage;
 uint8_t enemies_left[24];
 uint8_t enemies_right[24];
 uint8_t next_wave_timer;
+bullet_t enemy_bullets[5];
+uint8_t enemy_bullets_count;
+uint8_t enemy_bullets_cooldown;
+uint8_t enemy_bullets_timer;
 
 // Used to determine movement for next turn.
 uint8_t cur_leftmost_enemy_x;

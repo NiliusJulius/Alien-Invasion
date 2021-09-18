@@ -21,6 +21,12 @@
 #define PLAYER_BULLET_TILE_INDEX 4
 #define EXPLOSION_TILE_INDEX 6
 #define ENEMY_MULTI_TILE_INDEX 8
+#define ENEMY_BULLETS_TILE_INDEX 4
+
+#define ENEMY_BULLETS_SPRITE_INDEX 10
+#define ENEMY_BULLETS_ARRAY_LENGTH 5
+#define ENEMY_BULLETS_COOLDOWN 200
+#define ENEMY_BULLETS_DECREASE 10
 
 #define SPRITE_WIDTH 8
 #define SPRITE_HEIGHT 16
@@ -44,6 +50,8 @@ extern uint8_t game_state;
 
 extern BCD score;
 
+extern uint8_t seed;
+
 extern player_t player;
 extern bullet_t player_bullet;
 extern enemy_t enemies[ENEMY_ARRAY_LENGTH];
@@ -55,6 +63,10 @@ extern uint8_t enemy_stage;
 extern uint8_t enemies_left[24];
 extern uint8_t enemies_right[24];
 extern uint8_t next_wave_timer;
+extern bullet_t enemy_bullets[5];
+extern uint8_t enemy_bullets_count;
+extern uint8_t enemy_bullets_cooldown;
+extern uint8_t enemy_bullets_timer;
 
 // Used to determine movement for next turn.
 extern uint8_t cur_leftmost_enemy_x;

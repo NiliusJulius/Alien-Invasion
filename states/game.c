@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <gb\gb.h>
+#include <rand.h>
 #include "..\typedefs.h"
 #include "..\globals.h"
 #include "..\sound\sound.h"
@@ -77,6 +78,9 @@ void createEnemies() {
     enemy->location[1] = 30 + SPRITE_HEIGHT * (i / ENEMIES_PER_ROW);
     enemy->destroyed = false;
     enemy->value = MAKE_BCD(100);
+    enemy->bullet_cooldown = arand() & 0x7FF;
+    enemy->bullet_cooldown |= 0xFF;
+    enemy->bullet_timer = arand() & 0x7FF;
     move_sprite(enemy->sprite_index, enemy->location[0], enemy->location[1]);
 
     switch (enemy_groups[enemy_stage % ENEMY_GROUPS_COUNT][i])
@@ -128,6 +132,16 @@ void createEnemies() {
   prev_leftmost_enemy_x = enemies[0].location[0];
   prev_rightmost_enemy_x = enemies[ENEMY_ARRAY_LENGTH - 1].location[0] + SPRITE_WIDTH;
   lowest_enemy_y = 0;
+
+  // Reset bullets
+  enemy_bullets_count = 0;
+  enemy_bullets_cooldown = ENEMY_BULLETS_COOLDOWN;
+  enemy_bullets_timer = 0;
+  for (int8_t i = 0; i < ENEMY_BULLETS_ARRAY_LENGTH; i++) {
+    enemy_bullets[i].location[0] = 0;
+    enemy_bullets[i].location[1] = 0; 
+    move_sprite(enemy_bullets[i].sprite_index, 0, 0);
+  }
 }
 
 void prepare_move_enemies() {
@@ -213,6 +227,11 @@ void prepare_move_enemies() {
         cur_rightmost_enemy_x = enemies[i].location[0] + SPRITE_WIDTH;
       }
 
+    }
+
+    // Update bullet cooldown timer.
+    if (enemies[i].bullet_timer > 0) {
+      enemies[i].bullet_timer--;
     }
   }
 
@@ -337,6 +356,11 @@ void move_enemies() {
       }
 
     }
+    
+    // Update bullet cooldown timer.
+    if (enemies[i].bullet_timer > 0) {
+      enemies[i].bullet_timer--;
+    }
   }
 
   if (enemies_move_down) {
@@ -438,6 +462,11 @@ void after_move_enemies() {
       }
 
     }
+
+    // Update bullet cooldown timer.
+    if (enemies[i].bullet_timer > 0) {
+      enemies[i].bullet_timer--;
+    }
   }
 }
 
@@ -515,6 +544,11 @@ void regular_enemies_update() {
       }
 
     }
+
+    // Update bullet cooldown timer.
+    if (enemies[i].bullet_timer > 0) {
+      enemies[i].bullet_timer--;
+    }
   }
 }
 
@@ -530,17 +564,11 @@ void update_enemies() {
       } else {
         enemies_move_delay -= enemies_move_delay_decrease;
       }
+      
+      if (enemy_bullets_cooldown > ENEMY_BULLETS_DECREASE) {
+        enemy_bullets_cooldown -= ENEMY_BULLETS_DECREASE;
+      }
       createEnemies();
-    }
-  }
-
-  if (enemy_movement_timer == 0) {
-    // Lose condition when an enemy reaches the height of the player
-    if (lowest_enemy_y >= 144) {
-      // Temporary loss placeholder.
-      player.location[0] = 0;
-      player.location[1] = 0;
-      move_sprite(player.sprite_index, 0, 0);
     }
   }
 
@@ -549,6 +577,15 @@ void update_enemies() {
     enemy_movement_timer++;
   } else if (enemy_movement_timer == 0) {
     after_move_enemies();
+
+    // Lose condition when an enemy reaches the height of the player
+    if (lowest_enemy_y >= 144) {
+      // Temporary loss placeholder.
+      player.location[0] = 0;
+      player.location[1] = 0;
+      move_sprite(player.sprite_index, 0, 0);
+    }
+
     enemy_movement_timer++;
   } else if (enemy_movement_timer == enemies_move_delay) {
     move_enemies();
@@ -556,6 +593,58 @@ void update_enemies() {
   } else {
     regular_enemies_update();
     enemy_movement_timer++;
+  }
+
+  
+  // Check if it is time to shoot and there is a bullet slot free.
+  if (enemy_bullets_timer >= enemy_bullets_cooldown) {
+    if (enemy_bullets_count < ENEMY_BULLETS_ARRAY_LENGTH) {
+      for (uint8_t i=ENEMY_ARRAY_LENGTH; i>0; i--) {
+        // Destroyed enemies cannot shoot.
+        if (!enemies[i-1].destroyed) {
+          // Can not shoot if there is still a lower enemy.
+          if (!(i - 1 + ENEMIES_PER_ROW <= ENEMY_ARRAY_LENGTH && !enemies[i - 1 + ENEMIES_PER_ROW].destroyed)) {
+            // If the enemy bullet cooldown is not yet done, we can skip it.
+            if (enemies[i-1].bullet_timer == 0) {
+              for (uint8_t j = 0; j < ENEMY_BULLETS_ARRAY_LENGTH; j++) {
+                if (enemy_bullets[j].location[1] + SPRITE_HEIGHT <= 16 || enemy_bullets[j].location[1] >= 160) {
+                  enemy_bullets[j].location[0] = enemies[i-1].location[0] + enemies[i-1].sprite_left_offset - enemies[i-1].sprite_right_offset;
+                  enemy_bullets[j].location[1] = enemies[i-1].location[1] + SPRITE_HEIGHT - enemies[i-1].sprite_bottom_offset;
+                  enemy_bullets[j].speed = 1;
+                  enemy_bullets[j].sprite_left_offset = 3;
+                  enemy_bullets[j].sprite_right_offset = 3;
+                  enemy_bullets[j].sprite_top_offset = 0;
+                  enemy_bullets[j].sprite_top_offset = 8;
+                  set_sprite_tile(enemy_bullets[j].sprite_index, ENEMY_BULLETS_TILE_INDEX);
+                  move_sprite(enemy_bullets[j].sprite_index, enemy_bullets[j].location[0], enemy_bullets[j].location[1]);
+
+                  enemy_bullets_count++;
+                  enemies[i-1].bullet_timer = enemies[i-1].bullet_cooldown;
+
+                  // Once one bullet has been fired, we can jump out of the loops. My first use of goto ever :o
+                  goto bullet_fired;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    bullet_fired:
+    enemy_bullets_timer = 0;
+  } else {
+    enemy_bullets_timer++;
+  }
+}
+
+void update_enemy_bullets() {
+  for (uint8_t i=0; i<ENEMY_BULLETS_ARRAY_LENGTH; i++) {
+    enemy_bullets_count = 0;
+    if (enemy_bullets[i].location[1] < 160 && enemy_bullets[i].location[1] + SPRITE_HEIGHT > 16) {
+      enemy_bullets[i].location[1] = enemy_bullets[i].location[1] + 1 * enemy_bullets[i].speed;
+      move_sprite(enemy_bullets[i].sprite_index, enemy_bullets[i].location[0], enemy_bullets[i].location[1]);
+      enemy_bullets_count++;
+    }
   }
 }
 
@@ -610,6 +699,10 @@ void init_game() {
 
   score = MAKE_BCD(0);
 
+  // Create and set random seed.
+  seed = DIV_REG;
+  initarand(seed);
+
   // Create the score text on screen.
   unsigned char scoreText[] = {0x1D, 0xD, 0x19, 0x1C, 0xF};
   set_win_tiles(0, 0, 5, 1, scoreText);
@@ -627,6 +720,10 @@ void init_game() {
   enemies_move_down = false;
   enemies_move_delay = ENEMY_MOVEMENT_DELAY;
   enemies_move_delay_decrease = ENEMY_MOVEMENT_DELAY_DECREASE;
+ 
+  for (int8_t i = 0; i < ENEMY_BULLETS_ARRAY_LENGTH; i++) {
+    enemy_bullets[i].sprite_index = ENEMY_BULLETS_SPRITE_INDEX + i; 
+  }
 
   // Set initial values of the player instance.
   player.sprite_count = 2;
@@ -686,6 +783,7 @@ void run_game() {
   animate_player();
 
   update_enemies();
+  update_enemy_bullets();
 
   update_explosion();
   

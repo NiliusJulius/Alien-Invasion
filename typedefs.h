@@ -40,6 +40,8 @@ typedef struct Enemy {
   bool bottom_enemy;
   bool destroyed;
   BCD value;
+  uint16_t bullet_cooldown;
+  uint16_t bullet_timer;
 } enemy_t;
 
 typedef struct Explosion {
