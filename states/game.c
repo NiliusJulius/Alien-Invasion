@@ -79,7 +79,6 @@ void update_player_bullet() {
 void createEnemies() {
   // Reset bullets
   enemy_bullets_count = 0;
-  enemy_bullets_cooldown = ENEMY_BULLETS_COOLDOWN;
   enemy_bullets_timer = 0;
   for (uint8_t j = 0; j < ENEMY_BULLETS_ARRAY_LENGTH; j++) {
     enemy_bullets[j].location[0] = 0;
@@ -735,6 +734,7 @@ void init_game() {
   enemies_move_down = false;
   enemies_move_delay = ENEMY_MOVEMENT_DELAY;
   enemies_move_delay_decrease = ENEMY_MOVEMENT_DELAY_DECREASE;
+  enemy_bullets_cooldown = ENEMY_BULLETS_COOLDOWN;
  
   for (int8_t i = 0; i < ENEMY_BULLETS_ARRAY_LENGTH; i++) {
     enemy_bullets[i].sprite_index = ENEMY_BULLETS_SPRITE_INDEX + i; 
