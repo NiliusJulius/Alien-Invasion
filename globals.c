@@ -28,6 +28,7 @@ bullet_t enemy_bullets[5];
 uint8_t enemy_bullets_count;
 uint8_t enemy_bullets_cooldown;
 uint8_t enemy_bullets_timer;
+uint8_t enemy_which_will_shoot;
 
 // Used to determine movement for next turn.
 uint8_t cur_leftmost_enemy_x;

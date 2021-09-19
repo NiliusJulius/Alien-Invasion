@@ -5,6 +5,8 @@
 #include "..\states\game.h"
 
 void init_intro() {
+  HIDE_WIN;
+  HIDE_SPRITES;
   SHOW_BKG;
 
   set_bkg_tiles(7, 8, 5, 2, intro_map);

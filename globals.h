@@ -17,6 +17,8 @@
 
 #define PLAYER_TILE_INDEX 0
 #define PLAYER_ANIM_SPEED 14
+#define PLAYER_START_HEIGHT 144
+#define PLAYER_START_WIDTH 30
 
 #define PLAYER_BULLET_TILE_INDEX 4
 #define EXPLOSION_TILE_INDEX 6
@@ -67,6 +69,7 @@ extern bullet_t enemy_bullets[5];
 extern uint8_t enemy_bullets_count;
 extern uint8_t enemy_bullets_cooldown;
 extern uint8_t enemy_bullets_timer;
+extern uint8_t enemy_which_will_shoot;
 
 // Used to determine movement for next turn.
 extern uint8_t cur_leftmost_enemy_x;
