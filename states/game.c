@@ -601,7 +601,17 @@ void update_enemies() {
   if (enemy_bullets_timer >= enemy_bullets_cooldown) {
     if (enemy_bullets_count < ENEMY_BULLETS_ARRAY_LENGTH) {
       // Determine which enemy will fire.
-      enemy_which_will_shoot = rand() % ENEMY_ARRAY_LENGTH;
+      enemy_which_will_shoot = rand();
+      enemy_which_will_shoot = enemy_which_will_shoot % ENEMY_ARRAY_LENGTH;
+
+      // If this enemy has already been destroyed, keep adding 1 until we find one that exists.
+      do {
+        enemy_which_will_shoot++;
+        if (enemy_which_will_shoot >= ENEMY_ARRAY_LENGTH) {
+          enemy_which_will_shoot = 0;
+        }
+      } while (enemies[enemy_which_will_shoot].destroyed);
+
       // If a lower enemy exists, that enemy will shoot.
       do {
         if (!enemies[enemy_which_will_shoot + ENEMIES_PER_ROW].destroyed) {
@@ -658,6 +668,29 @@ void update_enemy_bullets() {
           game_over();
         }
       }
+
+      // Check whether the player's bullet is hit by an enemy bullet.
+      if (enemy_bullets[i].location[0] + enemy_bullets[i].sprite_left_offset < player_bullet.location[0] + SPRITE_WIDTH - player_bullet.sprite_right_offset &&
+              enemy_bullets[i].location[0] - enemy_bullets[i].sprite_right_offset + SPRITE_WIDTH > player_bullet.location[0] + player_bullet.sprite_left_offset &&
+              enemy_bullets[i].location[1] + enemy_bullets[i].sprite_top_offset < player_bullet.location[1] + SPRITE_HEIGHT - player_bullet.sprite_bottom_offset &&
+              enemy_bullets[i].location[1] - enemy_bullets[i].sprite_bottom_offset + SPRITE_HEIGHT > player_bullet.location[1] + player_bullet.sprite_top_offset
+      ) {
+        // Update the explosion to show on the bullet location.
+        explosion.location[0] = enemy_bullets[i].location[0];
+        explosion.location[1] = enemy_bullets[i].location[1];
+        explosion.time_since_animation_start = 0;
+        move_sprite(explosion.sprite_index, explosion.location[0], explosion.location[1]);
+        explosion.is_on_screen = true;
+
+        // Destroy the player's bullet and enemy bullet.
+        player_bullet.location[0] = 0;
+        player_bullet.location[1] = 0;
+        move_sprite(player_bullet.sprite_index, 0, 0);
+        enemy_bullets[i].location[0] = 0;
+        enemy_bullets[i].location[1] = 0;
+        move_sprite(enemy_bullets[i].sprite_index, 0, 0);
+        enemy_bullets_count--;
+      }
     }
   }
 }
@@ -705,10 +738,6 @@ void update_controls() {
 }
 
 void init_game() {
-  SPRITES_8x16;
-  SHOW_SPRITES;
-  SHOW_WIN;
-
   set_music(MUSIC_STAGE1);
 
   score = MAKE_BCD(0);
@@ -768,6 +797,7 @@ void init_game() {
   // Set player bullet sprite data.
   set_sprite_data(PLAYER_BULLET_TILE_INDEX, player_bullet.sprite_count * TILE_INDEX_MULTIPLIER, bullet_sprites);
   set_sprite_tile(player_bullet.sprite_index, PLAYER_BULLET_TILE_INDEX);
+  move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
 
   // Set enemy sprite data.
   set_sprite_data(ENEMY_MULTI_TILE_INDEX, 3 * TILE_INDEX_MULTIPLIER, multiple_enemy_sprites);
@@ -782,6 +812,11 @@ void init_game() {
   // Set explostion sprite data.
   set_sprite_data(EXPLOSION_TILE_INDEX, 1 * TILE_INDEX_MULTIPLIER, explosion_sprites);
   set_sprite_tile(explosion.sprite_index, EXPLOSION_TILE_INDEX);
+  move_sprite(explosion.sprite_index, explosion.location[0], explosion.location[1]);
+
+  SPRITES_8x16;
+  SHOW_SPRITES;
+  SHOW_WIN;
 }
 
 void run_game() {
