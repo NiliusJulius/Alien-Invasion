@@ -12,8 +12,9 @@
 #define KEY_TICKED(K)   ((curr_input & (K)) && !(prev_input & (K)))
 #define KEY_RELEASED(K) ((prev_input & (K)) && !(curr_input & (K)))
 
-#define STATE_INTRO				0
-#define STATE_GAME				1
+#define STATE_INTRO 0
+#define STATE_GAME 1
+#define STATE_GAME_OVER 2
 
 #define PLAYER_TILE_INDEX 0
 #define PLAYER_ANIM_SPEED 14
@@ -51,6 +52,7 @@ extern uint8_t prev_input;
 extern uint8_t game_state;
 
 extern BCD score;
+extern BCD high_score;
 
 extern uint8_t seed;
 

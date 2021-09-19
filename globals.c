@@ -10,6 +10,7 @@ uint8_t prev_input;
 uint8_t game_state;
 
 BCD score;
+BCD high_score;
 
 uint8_t seed;
 

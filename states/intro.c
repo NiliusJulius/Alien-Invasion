@@ -9,7 +9,7 @@ void init_intro() {
   HIDE_SPRITES;
   SHOW_BKG;
 
-  set_bkg_tiles(7, 8, 5, 2, intro_map);
+  set_bkg_tiles(0, 0, 20, 18, intro_map);
 
   set_music(MUSIC_INTRO);
 }

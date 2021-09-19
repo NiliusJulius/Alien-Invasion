@@ -7,6 +7,7 @@
 
 #include "states\game.h"
 #include "states\intro.h"
+#include "states\game_over.h"
 
 void main() {
 
@@ -15,6 +16,8 @@ void main() {
   font_init();
   min_font = font_load(font_min);
   font_set(min_font);
+
+  high_score = MAKE_BCD(0);
 
   // Initialize sound and music.
   sound_cnt_ch1 = 0;
@@ -31,6 +34,9 @@ void main() {
         break;
       case STATE_GAME:
         run_game();
+        break;
+      case STATE_GAME_OVER:
+        run_game_over();
         break;
     }
     

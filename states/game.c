@@ -4,7 +4,7 @@
 #include <rand.h>
 #include "..\typedefs.h"
 #include "..\globals.h"
-#include "intro.h"
+#include "game_over.h"
 #include "..\sound\sound.h"
 #include "..\sound\music.h"
 #include "..\levels\enemy_groups.h"
@@ -15,8 +15,8 @@
 #include "..\sprites\multiple_enemy_sprites.h"
 
 void game_over() {
-  init_intro();
-  game_state = STATE_INTRO;
+  init_game_over();
+  game_state = STATE_GAME_OVER;
 }
 
 void animate_player() {
