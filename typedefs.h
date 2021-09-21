@@ -31,6 +31,7 @@ typedef struct Bullet {
 
 typedef struct Enemy {
   uint8_t sprite_index;
+  uint8_t tile_index;
   uint8_t location[2];
   uint8_t sprite_left_offset;
   uint8_t sprite_right_offset;

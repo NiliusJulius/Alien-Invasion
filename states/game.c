@@ -13,6 +13,7 @@
 #include "..\sprites\bullet_sprites.h"
 #include "..\sprites\explosion_sprites.h"
 #include "..\sprites\multiple_enemy_sprites.h"
+#include "..\sprites\multiple_enemy_sprites_sec.h"
 
 void game_over() {
   init_game_over();
@@ -106,6 +107,7 @@ void createEnemies() {
       enemy->sprite_right_offset = 0;
       enemy->top_enemy = true;
       enemy->bottom_enemy = true;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX;
       set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX);
       enemies_remaining += 2;
       break;
@@ -116,6 +118,7 @@ void createEnemies() {
       enemy->sprite_right_offset = 0;
       enemy->top_enemy = true;
       enemy->bottom_enemy = false;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 2;
       set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 2);
       enemies_remaining += 1;
       break;
@@ -126,6 +129,7 @@ void createEnemies() {
       enemy->sprite_right_offset = 0;
       enemy->top_enemy = false;
       enemy->bottom_enemy = true;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 4;
       set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 4);
       enemies_remaining += 1;
       break;
@@ -347,6 +351,10 @@ void move_enemies() {
       enemies[i].location[1] = enemies[i].location[1] + movement_y;
 
       move_sprite(enemies[i].sprite_index, enemies[i].location[0], enemies[i].location[1]);
+
+      // Animate the enemy. The first and second frame are 64 tiles apart.
+      enemies[i].tile_index ^= 0x1000000;
+      set_sprite_tile(enemies[i].sprite_index, enemies[i].tile_index);
 
       // Determine if we are going to move from one half of the screen to the other.
       // Since all enemies always move by 1 pixel we can simply check for the dividing line.
@@ -800,7 +808,8 @@ void init_game() {
   move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
 
   // Set enemy sprite data.
-  set_sprite_data(ENEMY_MULTI_TILE_INDEX, 3 * TILE_INDEX_MULTIPLIER, multiple_enemy_sprites);
+  set_sprite_data(ENEMY_MULTI_TILE_INDEX, 3 * ENEMY_TYPES * TILE_INDEX_MULTIPLIER, multiple_enemy_sprites);
+  set_sprite_data(ENEMY_SECOND_FRAME_TILE_INDEX, 3 * ENEMY_TYPES * TILE_INDEX_MULTIPLIER, enemy_sprites_sec);
   // Set initial values of enemy instances.
   createEnemies();
 
