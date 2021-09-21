@@ -1,6 +1,6 @@
 /*
 
- MULTIPLEENEMYSPRITES.H
+ MULTIPLE_ENEMY_SPRITES.H
 
  Include File.
 
@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 16
-  Tiles                : 0 to 3
+  Tiles                : 0 to 5
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -22,10 +22,14 @@
 
 */
 
+#ifndef __multiple_enemy_sprites_h_INCLUDE
+#define __multiple_enemy_sprites_h_INCLUDE
 
 /* Bank of tiles. */
-#define MultipleEnemySpritesBank 0
+#define enemy_spritesBank 0
 /* Start of tile array. */
-extern unsigned char multiple_enemy_sprites[];
+extern const unsigned char enemy_sprites[];
 
-/* End of MULTIPLEENEMYSPRITES.H */
+#endif
+
+/* End of MULTIPLE_ENEMY_SPRITES.H */

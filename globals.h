@@ -29,7 +29,7 @@
 
 #define ENEMY_BULLETS_SPRITE_INDEX 10
 #define ENEMY_BULLETS_ARRAY_LENGTH 5
-#define ENEMY_BULLETS_COOLDOWN 10
+#define ENEMY_BULLETS_COOLDOWN 80
 #define ENEMY_BULLETS_DECREASE 10
 
 #define SPRITE_WIDTH 8
@@ -40,8 +40,8 @@
 // Because we are running in 8x16 sprite mode, all tile indexes should be multiplied by 2.
 #define TILE_INDEX_MULTIPLIER 2
 
-#define ENEMY_TYPES 1
-#define ENEMY_GROUPS_COUNT 2
+#define ENEMY_TYPES 2
+#define ENEMY_GROUPS_COUNT 3
 #define ENEMY_ARRAY_LENGTH 21
 #define ENEMIES_PER_ROW 7
 #define ENEMY_MOVEMENT_DELAY 48
