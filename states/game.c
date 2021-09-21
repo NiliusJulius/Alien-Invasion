@@ -175,7 +175,7 @@ void enemy_collision_check(uint8_t i) {
               player_bullet.location[1] - player_bullet.sprite_bottom_offset + SPRITE_HEIGHT > enemies[i].location[1] + enemies[i].sprite_top_offset
       ) {
         // Set the explosion x location first, since we will move the destroyed enemies.
-        explosion.location[0] = enemies[i].location[0];
+        explosion.location[0] = enemies[i].location[0] + (enemies[i].sprite_left_offset - enemies[i].sprite_right_offset) / 2;
 
         // Play explosion sound.
         set_sound(SOUND_EXPLOSION);
