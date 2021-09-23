@@ -169,8 +169,8 @@ void enemy_collision_check(uint8_t i) {
     // Only check collision for enemies on the same side of the screen as the bullet.
     if ((player_bullet.location[0] < HALF_SCREEN_WIDTH + SPRITE_WIDTH && enemies_left[i] == 1) || (player_bullet.location[0] >= HALF_SCREEN_WIDTH - SPRITE_WIDTH && enemies_right[i] == 1)) {
       // Check whether the enemy is being hit by the player's bullet.
-      if (player_bullet.location[0] + player_bullet.sprite_left_offset < enemies[i].location[0] + enemies[i].sprite_right_offset + SPRITE_WIDTH &&
-              player_bullet.location[0] - player_bullet.sprite_right_offset + SPRITE_WIDTH > enemies[i].location[0] - enemies[i].sprite_left_offset &&
+      if (player_bullet.location[0] + player_bullet.sprite_left_offset < enemies[i].location[0] - enemies[i].sprite_right_offset + SPRITE_WIDTH &&
+              player_bullet.location[0] - player_bullet.sprite_right_offset + SPRITE_WIDTH > enemies[i].location[0] + enemies[i].sprite_left_offset &&
               player_bullet.location[1] + player_bullet.sprite_top_offset < enemies[i].location[1] - enemies[i].sprite_bottom_offset + SPRITE_HEIGHT &&
               player_bullet.location[1] - player_bullet.sprite_bottom_offset + SPRITE_HEIGHT > enemies[i].location[1] + enemies[i].sprite_top_offset
       ) {
