@@ -304,7 +304,7 @@ void move_enemies() {
       move_sprite(enemies[i].sprite_index, enemies[i].location[0], enemies[i].location[1]);
 
       // Animate the enemy. The first and second frame are 64 tiles apart.
-      enemies[i].tile_index ^= 0x1000000;
+      enemies[i].tile_index ^= 64;
       set_sprite_tile(enemies[i].sprite_index, enemies[i].tile_index);
 
       // Determine if we are going to move from one half of the screen to the other.
