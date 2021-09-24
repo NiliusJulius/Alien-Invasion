@@ -94,7 +94,7 @@ void createEnemies() {
     enemy->location[1] = 30 + SPRITE_HEIGHT * (i / ENEMIES_PER_ROW);
     enemy->destroyed = false;
     enemy->value = MAKE_BCD(100);
-    enemy->bullet_cooldown = 20;
+    enemy->bullet_cooldown = 50;
     enemy->bullet_timer = 0;
     move_sprite(enemy->sprite_index, enemy->location[0], enemy->location[1]);
 
@@ -437,46 +437,42 @@ void update_enemies() {
   // Check if it is time to shoot and there is a bullet slot free.
   if (enemy_bullets_timer >= enemy_bullets_cooldown) {
     if (enemy_bullets_count < ENEMY_BULLETS_ARRAY_LENGTH) {
+      // Determine which enemies are the lowest per column.
+      for (uint8_t i=0; i < ENEMIES_PER_ROW; i++) {
+        lowest_enemies[i] = ENEMY_ARRAY_LENGTH - 1 - i;
+
+        // If this enemy is destroyed, look for a higher enemy which will shoot.
+        while (enemies[lowest_enemies[i]].destroyed || lowest_enemies[i] < ENEMIES_PER_ROW) {
+          lowest_enemies[i] -= ENEMIES_PER_ROW;
+        } 
+      }
+
       // Determine which enemy will fire.
       enemy_which_will_shoot = rand();
-      enemy_which_will_shoot = enemy_which_will_shoot % ENEMY_ARRAY_LENGTH;
+      enemy_which_will_shoot = lowest_enemies[enemy_which_will_shoot % ENEMIES_PER_ROW];
 
-      // If this enemy has already been destroyed, keep adding 1 until we find one that exists.
-      do {
-        enemy_which_will_shoot++;
-        if (enemy_which_will_shoot >= ENEMY_ARRAY_LENGTH) {
-          enemy_which_will_shoot = 0;
-        }
-      } while (enemies[enemy_which_will_shoot].destroyed);
+      // If the enemy has been destroyed, we skip shooting.
+      if (!enemies[enemy_which_will_shoot].destroyed) {
+        // If the enemy bullet cooldown is not yet done, we can skip it.
+        if (enemies[enemy_which_will_shoot].bullet_timer == 0) {
+          for (uint8_t j = 0; j < ENEMY_BULLETS_ARRAY_LENGTH; j++) {
+            if (enemy_bullets[j].location[1] + SPRITE_HEIGHT <= 16 || enemy_bullets[j].location[1] >= 160) {
+              enemy_bullets[j].location[0] = enemies[enemy_which_will_shoot].location[0] + enemies[enemy_which_will_shoot].sprite_left_offset - enemies[enemy_which_will_shoot].sprite_right_offset;
+              enemy_bullets[j].location[1] = enemies[enemy_which_will_shoot].location[1] + SPRITE_HEIGHT - enemies[enemy_which_will_shoot].sprite_bottom_offset;
+              enemy_bullets[j].speed = 1;
+              enemy_bullets[j].sprite_left_offset = 3;
+              enemy_bullets[j].sprite_right_offset = 3;
+              enemy_bullets[j].sprite_top_offset = 0;
+              enemy_bullets[j].sprite_bottom_offset = 8;
+              set_sprite_tile(enemy_bullets[j].sprite_index, ENEMY_BULLETS_TILE_INDEX);
+              move_sprite(enemy_bullets[j].sprite_index, enemy_bullets[j].location[0], enemy_bullets[j].location[1]);
 
-      // If a lower enemy exists, that enemy will shoot.
-      do {
-        if (!enemies[enemy_which_will_shoot + ENEMIES_PER_ROW].destroyed) {
-          enemy_which_will_shoot += ENEMIES_PER_ROW;
-        } else {
-          break;
-        }
-      } while (enemy_which_will_shoot + ENEMIES_PER_ROW < ENEMY_ARRAY_LENGTH);
+              enemy_bullets_count++;
+              enemies[enemy_which_will_shoot].bullet_timer = enemies[enemy_which_will_shoot].bullet_cooldown;
 
-      // If the enemy bullet cooldown is not yet done, we can skip it.
-      if (enemies[enemy_which_will_shoot].bullet_timer == 0) {
-        for (uint8_t j = 0; j < ENEMY_BULLETS_ARRAY_LENGTH; j++) {
-          if (enemy_bullets[j].location[1] + SPRITE_HEIGHT <= 16 || enemy_bullets[j].location[1] >= 160) {
-            enemy_bullets[j].location[0] = enemies[enemy_which_will_shoot].location[0] + enemies[enemy_which_will_shoot].sprite_left_offset - enemies[enemy_which_will_shoot].sprite_right_offset;
-            enemy_bullets[j].location[1] = enemies[enemy_which_will_shoot].location[1] + SPRITE_HEIGHT - enemies[enemy_which_will_shoot].sprite_bottom_offset;
-            enemy_bullets[j].speed = 1;
-            enemy_bullets[j].sprite_left_offset = 3;
-            enemy_bullets[j].sprite_right_offset = 3;
-            enemy_bullets[j].sprite_top_offset = 0;
-            enemy_bullets[j].sprite_bottom_offset = 8;
-            set_sprite_tile(enemy_bullets[j].sprite_index, ENEMY_BULLETS_TILE_INDEX);
-            move_sprite(enemy_bullets[j].sprite_index, enemy_bullets[j].location[0], enemy_bullets[j].location[1]);
-
-            enemy_bullets_count++;
-            enemies[enemy_which_will_shoot].bullet_timer = enemies[enemy_which_will_shoot].bullet_cooldown;
-
-            // Once one bullet has been fired, we can jump out of the loop.
-            break;
+              // Once one bullet has been fired, we can jump out of the loop.
+              break;
+            }
           }
         }
       }

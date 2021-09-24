@@ -45,7 +45,7 @@
 #define ENEMY_ARRAY_LENGTH 21
 #define ENEMIES_PER_ROW 7
 #define ENEMY_MOVEMENT_DELAY 48
-#define ENEMY_MOVEMENT_DELAY_DECREASE 1
+#define ENEMY_MOVEMENT_DELAY_DECREASE 2
 #define ENEMY_MOVEMENT_DELAY_MIN 5
 
 extern uint8_t curr_input;
@@ -73,6 +73,7 @@ extern bullet_t enemy_bullets[5];
 extern uint8_t enemy_bullets_count;
 extern uint8_t enemy_bullets_cooldown;
 extern uint8_t enemy_bullets_timer;
+extern uint8_t lowest_enemies[7];
 extern uint8_t enemy_which_will_shoot;
 
 // Used to determine movement for next turn.
