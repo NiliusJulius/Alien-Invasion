@@ -25,10 +25,12 @@ https://gbdev.io/gbcompo21/
 
 ## Usage
 
-```bash
-Run make.bat to build the rom.
+Use [GBDK 2020 4.0.3](https://github.com/gbdk-2020/gbdk-2020/releases/tag/4.0.3 "GBDK 2020 4.0.3")
+
+Update make.bat and run it to build the rom.
 
 Commands to check disk usage:
+```bash
 
 ..\romusage.exe build\main.map -g -e:STACK:DEFF:100
 ..\romusage.exe build\main.map -g -e:SHADOW_OAM:C000:A0
@@ -40,3 +42,6 @@ Commands to check disk usage:
 ..\romusage.exe build\main.map -G -E
 ..\romusage.exe build\main.map -g
 ```
+
+## License
+[License](../master/LICENSE)
