@@ -580,7 +580,7 @@ void update_enemies() {
         lowest_enemies[i] = ENEMY_ARRAY_LENGTH - 1 - i;
 
         // If this enemy is destroyed, look for a higher enemy which will shoot.
-        while (enemies[lowest_enemies[i]].destroyed || lowest_enemies[i] < ENEMIES_PER_ROW) {
+        while (enemies[lowest_enemies[i]].destroyed && lowest_enemies[i] >= ENEMIES_PER_ROW) {
           lowest_enemies[i] -= ENEMIES_PER_ROW;
         } 
       }
