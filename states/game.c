@@ -679,7 +679,7 @@ void interruptLCD(){
 void update_window() {
   unsigned char buffer[9];
   bcd2text(&score, 0x01, buffer);
-  set_win_tiles(6, 0, 8, 1, buffer);
+  set_win_tiles(9, 0, 8, 1, buffer);
 }
 
 
@@ -731,7 +731,7 @@ void init_game() {
 
   // Create the score text on screen.
   unsigned char scoreText[] = {0x1D, 0xD, 0x19, 0x1C, 0xF};
-  set_win_tiles(0, 0, 5, 1, scoreText);
+  set_win_tiles(3, 0, 5, 1, scoreText);
 
   enemies_remaining = 0;
   enemy_movement_timer = 0;
@@ -799,7 +799,6 @@ void init_game() {
   move_sprite(explosion.sprite_index, explosion.location[0], explosion.location[1]);
 
   // Create background
-  set_bkg_data(37, 31, background_tile_data);
   set_bkg_tiles(0, 0, 20, 18, background_map_data);
 
   SPRITES_8x16;

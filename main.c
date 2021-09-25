@@ -9,6 +9,9 @@
 #include "states\intro.h"
 #include "states\game_over.h"
 
+#include "maps\game_background.h"
+#include "maps\intro_map.h"
+
 void main() {
 
   // Create font.
@@ -16,6 +19,9 @@ void main() {
   font_init();
   min_font = font_load(font_min);
   font_set(min_font);
+
+  set_bkg_data(37, 31, background_tile_data);
+  set_bkg_data(69, 57, intro_tile_data);
 
   high_score = MAKE_BCD(0);
 
