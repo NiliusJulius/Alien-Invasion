@@ -18,7 +18,7 @@
 
 #define PLAYER_TILE_INDEX 0
 #define PLAYER_ANIM_SPEED 14
-#define PLAYER_START_HEIGHT 144
+#define PLAYER_START_HEIGHT 134
 #define PLAYER_START_WIDTH 30
 
 #define PLAYER_BULLET_TILE_INDEX 4
@@ -40,11 +40,11 @@
 // Because we are running in 8x16 sprite mode, all tile indexes should be multiplied by 2.
 #define TILE_INDEX_MULTIPLIER 2
 
-#define ENEMY_TYPES 2
-#define ENEMY_GROUPS_COUNT 3
+#define ENEMY_TYPES 6
+#define ENEMY_GROUPS_COUNT 6
 #define ENEMY_ARRAY_LENGTH 21
 #define ENEMIES_PER_ROW 7
-#define ENEMY_MOVEMENT_DELAY 48
+#define ENEMY_MOVEMENT_DELAY 36
 #define ENEMY_MOVEMENT_DELAY_DECREASE 2
 #define ENEMY_MOVEMENT_DELAY_MIN 5
 

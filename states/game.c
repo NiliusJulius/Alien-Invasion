@@ -9,6 +9,8 @@
 #include "..\sound\music.h"
 #include "..\levels\enemy_groups.h"
 
+#include "..\maps\game_background.h"
+
 #include "..\sprites\player_sprites.h"
 #include "..\sprites\bullet_sprites.h"
 #include "..\sprites\explosion_sprites.h"
@@ -93,8 +95,6 @@ void createEnemies() {
     enemy->location[0] = 36 + SPRITE_WIDTH * 2 * (i % ENEMIES_PER_ROW);
     enemy->location[1] = 30 + SPRITE_HEIGHT * (i / ENEMIES_PER_ROW);
     enemy->destroyed = false;
-    enemy->value = MAKE_BCD(100);
-    enemy->bullet_cooldown = 50;
     enemy->bullet_timer = 0;
     move_sprite(enemy->sprite_index, enemy->location[0], enemy->location[1]);
 
@@ -110,6 +110,8 @@ void createEnemies() {
       enemy->tile_index = ENEMY_MULTI_TILE_INDEX;
       set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX);
       enemies_remaining += 2;
+      enemy->value = MAKE_BCD(50);
+      enemy->bullet_cooldown = 100;
       break;
     case 2:
       enemy->sprite_top_offset = 0;
@@ -121,6 +123,8 @@ void createEnemies() {
       enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 2;
       set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 2);
       enemies_remaining += 1;
+      enemy->value = MAKE_BCD(50);
+      enemy->bullet_cooldown = 100;
       break;
     case 3:
       enemy->sprite_top_offset = HALF_SPRITE_HEIGHT;
@@ -132,17 +136,151 @@ void createEnemies() {
       enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 4;
       set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 4);
       enemies_remaining += 1;
+      enemy->value = MAKE_BCD(50);
+      enemy->bullet_cooldown = 100;
       break;
     case 4:
       enemy->sprite_top_offset = 0;
       enemy->sprite_bottom_offset = 1;
-      enemy->sprite_left_offset = 5;
+      enemy->sprite_left_offset = 0;
       enemy->sprite_right_offset = 0;
       enemy->top_enemy = true;
       enemy->bottom_enemy = true;
       enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 6;
       set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 6);
       enemies_remaining += 2;
+      enemy->value = MAKE_BCD(100);
+      enemy->bullet_cooldown = 75;
+      break;
+    case 5:
+      enemy->sprite_top_offset = 0;
+      enemy->sprite_bottom_offset = 1 + HALF_SPRITE_HEIGHT;
+      enemy->sprite_left_offset = 0;
+      enemy->sprite_right_offset = 0;
+      enemy->top_enemy = true;
+      enemy->bottom_enemy = false;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 8;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 8);
+      enemies_remaining += 1;
+      enemy->value = MAKE_BCD(100);
+      enemy->bullet_cooldown = 75;
+      break;
+    case 6:
+      enemy->sprite_top_offset = HALF_SPRITE_HEIGHT;
+      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_left_offset = 0;
+      enemy->sprite_right_offset = 0;
+      enemy->top_enemy = false;
+      enemy->bottom_enemy = true;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 10;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 10);
+      enemies_remaining += 1;
+      enemy->value = MAKE_BCD(100);
+      enemy->bullet_cooldown = 75;
+      break;
+    case 7:
+      enemy->sprite_top_offset = 0;
+      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_left_offset = 1;
+      enemy->sprite_right_offset = 1;
+      enemy->top_enemy = true;
+      enemy->bottom_enemy = true;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 12;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 12);
+      enemies_remaining += 2;
+      enemy->value = MAKE_BCD(125);
+      enemy->bullet_cooldown = 50;
+      break;
+    case 8:
+      enemy->sprite_top_offset = 0;
+      enemy->sprite_bottom_offset = 1 + HALF_SPRITE_HEIGHT;
+      enemy->sprite_left_offset = 1;
+      enemy->sprite_right_offset = 1;
+      enemy->top_enemy = true;
+      enemy->bottom_enemy = false;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 14;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 14);
+      enemies_remaining += 1;
+      enemy->value = MAKE_BCD(125);
+      enemy->bullet_cooldown = 50;
+      break;
+    case 9:
+      enemy->sprite_top_offset = HALF_SPRITE_HEIGHT;
+      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_left_offset = 1;
+      enemy->sprite_right_offset = 1;
+      enemy->top_enemy = false;
+      enemy->bottom_enemy = true;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 16;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 16);
+      enemies_remaining += 1;
+      enemy->value = MAKE_BCD(125);
+      enemy->bullet_cooldown = 50;
+      break;
+    case 10:
+      enemy->sprite_top_offset = 0;
+      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_left_offset = 0;
+      enemy->sprite_right_offset = 0;
+      enemy->top_enemy = true;
+      enemy->bottom_enemy = true;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 18;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 18);
+      enemies_remaining += 2;
+      enemy->value = MAKE_BCD(150);
+      enemy->bullet_cooldown = 50;
+      break;
+    case 11:
+      enemy->sprite_top_offset = 0;
+      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_left_offset = 2;
+      enemy->sprite_right_offset = 2;
+      enemy->top_enemy = true;
+      enemy->bottom_enemy = true;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 24;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 24);
+      enemies_remaining += 2;
+      enemy->value = MAKE_BCD(200);
+      enemy->bullet_cooldown = 50;
+      break;
+    case 12:
+      enemy->sprite_top_offset = 0;
+      enemy->sprite_bottom_offset = 1 + HALF_SPRITE_HEIGHT;
+      enemy->sprite_left_offset = 2;
+      enemy->sprite_right_offset = 2;
+      enemy->top_enemy = true;
+      enemy->bottom_enemy = false;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 26;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 26);
+      enemies_remaining += 1;
+      enemy->value = MAKE_BCD(200);
+      enemy->bullet_cooldown = 50;
+      break;
+    case 13:
+      enemy->sprite_top_offset = HALF_SPRITE_HEIGHT;
+      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_left_offset = 2;
+      enemy->sprite_right_offset = 2;
+      enemy->top_enemy = false;
+      enemy->bottom_enemy = true;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 28;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 28);
+      enemies_remaining += 1;
+      enemy->value = MAKE_BCD(200);
+      enemy->bullet_cooldown = 50;
+      break;
+    case 14:
+      enemy->sprite_top_offset = 0;
+      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_left_offset = 0;
+      enemy->sprite_right_offset = 0;
+      enemy->top_enemy = true;
+      enemy->bottom_enemy = true;
+      enemy->tile_index = ENEMY_MULTI_TILE_INDEX + 30;
+      set_sprite_tile(enemy->sprite_index, ENEMY_MULTI_TILE_INDEX + 30);
+      enemies_remaining += 2;
+      enemy->value = MAKE_BCD(500);
+      enemy->bullet_cooldown = 10;
       break;
     }
 
@@ -271,7 +409,7 @@ void move_enemies() {
   if (enemies_move_left) {
     if (prev_leftmost_enemy_x - 1 < 8) {
       movement_x = 0;
-      movement_y = 4;
+      movement_y = 8;
       enemies_move_down = true;
       enemies_move_left = false;
     } else {
@@ -281,7 +419,7 @@ void move_enemies() {
   } else {
     if (prev_rightmost_enemy_x + 1 > 168) {
       movement_x = 0;
-      movement_y = 4;
+      movement_y = 8;
       enemies_move_down = true;
       enemies_move_left = true;
     } else {
@@ -534,6 +672,10 @@ void update_enemy_bullets() {
   ###############
 */
 
+void interruptLCD(){
+    HIDE_WIN;
+}
+
 void update_window() {
   unsigned char buffer[9];
   bcd2text(&score, 0x01, buffer);
@@ -571,6 +713,14 @@ void update_controls() {
 }
 
 void init_game() {
+  STAT_REG = 0x45;
+  LYC_REG = 0x08;  //  Fire LCD Interupt on the 8th scan line (just first row)
+
+  disable_interrupts();
+  add_LCD(interruptLCD);
+  enable_interrupts();
+  set_interrupts(VBL_IFLAG | LCD_IFLAG);
+
   set_music(MUSIC_STAGE1);
 
   score = MAKE_BCD(0);
@@ -648,12 +798,18 @@ void init_game() {
   set_sprite_tile(explosion.sprite_index, EXPLOSION_TILE_INDEX);
   move_sprite(explosion.sprite_index, explosion.location[0], explosion.location[1]);
 
+  // Create background
+  set_bkg_data(37, 31, background_tile_data);
+  set_bkg_tiles(0, 0, 20, 18, background_map_data);
+
   SPRITES_8x16;
   SHOW_SPRITES;
   SHOW_WIN;
+  SHOW_BKG;
 }
 
 void run_game() {
+  SHOW_WIN;
   UPDATE_KEYS();
   update_controls();  
 
