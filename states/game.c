@@ -721,7 +721,7 @@ void init_game() {
   enable_interrupts();
   set_interrupts(VBL_IFLAG | LCD_IFLAG);
 
-  set_music(MUSIC_STAGE1);
+  stop_music();
 
   score = MAKE_BCD(0);
 
@@ -812,10 +812,9 @@ void run_game() {
   UPDATE_KEYS();
   update_controls();  
 
-  // If music and/or sound are set, play them.
-  // play_music();
-  stop_music();
+  // If sound is set, play it.
   play_sound();
+  
 
   // Update everything for the player.
   update_player();

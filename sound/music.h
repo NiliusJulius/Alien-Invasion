@@ -4,8 +4,7 @@
 #include <stdint.h>
 
 #define MUSIC_INTRO 0
-#define MUSIC_STAGE1 1
-
+#define MUSIC_GAME_OVER 1
 void init_sound();
 void set_music(uint8_t song);
 void play_music();

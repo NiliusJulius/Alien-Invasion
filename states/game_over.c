@@ -24,7 +24,7 @@ void init_game_over() {
   bcd2text(&high_score, 0x01, high_score_buffer);
   set_bkg_tiles(5, 13, 8, 1, high_score_buffer);
 
-  set_music(MUSIC_INTRO);
+  set_music(MUSIC_GAME_OVER);
 }
 
 void run_game_over() {
