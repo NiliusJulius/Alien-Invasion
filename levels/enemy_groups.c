@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "..\globals.h"
 
-uint8_t enemy_groups[ENEMY_GROUPS_COUNT][ENEMY_ARRAY_LENGTH] = { 
+const uint8_t enemy_groups[ENEMY_GROUPS_COUNT][ENEMY_ARRAY_LENGTH] = { 
     {
       2, 6, 2, 6, 2, 6, 2,
       2, 6, 2, 6, 2, 6, 2,
