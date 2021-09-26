@@ -26,6 +26,6 @@
 /* Bank of tiles. */
 #define ExplosionSpriteBank 0
 /* Start of tile array. */
-extern unsigned char explosion_sprites[];
+extern const unsigned char explosion_sprites[];
 
 /* End of EXPLOSION.H */

@@ -26,6 +26,6 @@
 /* Bank of tiles. */
 #define BulletSpritesBank 0
 /* Start of tile array. */
-extern unsigned char bullet_sprites[];
+extern const unsigned char bullet_sprites[];
 
 /* End of BULLETSPRITES.H */

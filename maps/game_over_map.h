@@ -1,1 +1,1 @@
-extern unsigned char game_over_map[];
+extern const unsigned char game_over_map[];
