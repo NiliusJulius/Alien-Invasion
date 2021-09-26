@@ -16,6 +16,11 @@ All of this comes at the cost of a lot of cpu usage, but figuring out how to kee
 
 All of this hopefully makes for some engaging and interesting additions to an classic game format.
 
+## 32KB
+
+Another limitation I had in mind was limiting myself to a game which would fit in a 32KB ROM, without anything else (so not RTC, save RAM, etc.).
+One of the reasons for this is that I have been able to make physical cartridges which can play those ROMs of 32KB, so I could make my game as a physical distribution from scratch.
+
 ## GB COMPO 2021 Game Jam
 
 Right when I started the project I heard about the announcement of the gbcompo21 game jam, so I decided to also enter this game.
