@@ -303,7 +303,7 @@ void createEnemies() {
 
 void enemy_collision_check(uint8_t i) {
   // Only check if the bullet is on screen.
-  if (player_bullet.location[1] + SPRITE_HEIGHT > 16) {
+  if (player_bullet.location[1] + SPRITE_HEIGHT > 16 && player_bullet.location[1] < 160) {
     // Only check collision for enemies on the same side of the screen as the bullet.
     if ((player_bullet.location[0] < HALF_SCREEN_WIDTH + SPRITE_WIDTH && enemies_left[i] == 1) || (player_bullet.location[0] >= HALF_SCREEN_WIDTH - SPRITE_WIDTH && enemies_right[i] == 1)) {
       // Check whether the enemy is being hit by the player's bullet.
@@ -536,6 +536,14 @@ void update_enemies() {
     if (next_wave_timer < 10) {
       next_wave_timer++;
     } else {
+      enemy_movement_timer = 0;
+      cur_leftmost_enemy_x = 255;
+      cur_rightmost_enemy_x = 0;
+      lowest_enemy_y = 0;
+      movement_x = 0;
+      movement_y = 0;
+      enemies_move_left = false;
+      enemies_move_down = false;
       next_wave_timer = 0;
       enemy_stage += 1;
       if (enemies_move_delay - enemies_move_delay_decrease <= ENEMY_MOVEMENT_DELAY_MIN) {
@@ -636,6 +644,7 @@ void update_enemy_bullets() {
                 enemy_bullets[i].location[1] + enemy_bullets[i].sprite_top_offset < player.location[1] + SPRITE_HEIGHT &&
                 enemy_bullets[i].location[1] - enemy_bullets[i].sprite_bottom_offset + SPRITE_HEIGHT > player.location[1] + 4
         ) {
+          set_sound(SOUND_EXPLOSION);
           game_over();
         }
       }
@@ -652,6 +661,7 @@ void update_enemy_bullets() {
         explosion.time_since_animation_start = 0;
         move_sprite(explosion.sprite_index, explosion.location[0], explosion.location[1]);
         explosion.is_on_screen = true;
+        set_sound(SOUND_EXPLOSION);
 
         // Destroy the player's bullet and enemy bullet.
         player_bullet.location[0] = 0;

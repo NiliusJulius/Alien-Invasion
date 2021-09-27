@@ -1,6 +1,7 @@
 #include <gb\gb.h>
 #include "..\globals.h"
 #include "..\sound\music.h"
+#include "..\sound\sound.h"
 #include "..\maps\game_over_map.h"
 #include "..\states\game.h"
 #include "..\states\intro.h"
@@ -37,6 +38,7 @@ void run_game_over() {
 
   // If music is set, play it.
   play_music();
+  play_sound();
 
   wait_vbl_done();
 }
