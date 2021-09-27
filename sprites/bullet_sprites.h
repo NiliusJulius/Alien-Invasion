@@ -1,6 +1,6 @@
 /*
 
- BULLETSPRITES.H
+ BULLET_SPRITES.H
 
  Include File.
 
@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 16
-  Tiles                : 0 to 1
+  Tiles                : 0 to 3
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -22,10 +22,14 @@
 
 */
 
+#ifndef __bullet_sprites_h_INCLUDE
+#define __bullet_sprites_h_INCLUDE
 
 /* Bank of tiles. */
-#define BulletSpritesBank 0
+#define bullet_spritesBank 0
 /* Start of tile array. */
 extern const unsigned char bullet_sprites[];
 
-/* End of BULLETSPRITES.H */
+#endif
+
+/* End of BULLET_SPRITES.H */

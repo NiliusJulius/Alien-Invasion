@@ -43,6 +43,7 @@ typedef struct Enemy {
   BCD value;
   uint8_t bullet_cooldown;
   uint8_t bullet_timer;
+  uint8_t bullet_type;
 } enemy_t;
 
 typedef struct Explosion {

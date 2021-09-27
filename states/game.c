@@ -112,6 +112,7 @@ void createEnemies() {
       enemies_remaining += 2;
       enemy->value = MAKE_BCD(50);
       enemy->bullet_cooldown = 100;
+      enemy->bullet_type = 0;
       break;
     case 2:
       enemy->sprite_top_offset = 0;
@@ -125,6 +126,7 @@ void createEnemies() {
       enemies_remaining += 1;
       enemy->value = MAKE_BCD(50);
       enemy->bullet_cooldown = 100;
+      enemy->bullet_type = 0;
       break;
     case 3:
       enemy->sprite_top_offset = HALF_SPRITE_HEIGHT;
@@ -138,6 +140,7 @@ void createEnemies() {
       enemies_remaining += 1;
       enemy->value = MAKE_BCD(50);
       enemy->bullet_cooldown = 100;
+      enemy->bullet_type = 0;
       break;
     case 4:
       enemy->sprite_top_offset = 0;
@@ -151,6 +154,7 @@ void createEnemies() {
       enemies_remaining += 2;
       enemy->value = MAKE_BCD(100);
       enemy->bullet_cooldown = 75;
+      enemy->bullet_type = 2;
       break;
     case 5:
       enemy->sprite_top_offset = 0;
@@ -164,6 +168,7 @@ void createEnemies() {
       enemies_remaining += 1;
       enemy->value = MAKE_BCD(100);
       enemy->bullet_cooldown = 75;
+      enemy->bullet_type = 2;
       break;
     case 6:
       enemy->sprite_top_offset = HALF_SPRITE_HEIGHT;
@@ -177,6 +182,7 @@ void createEnemies() {
       enemies_remaining += 1;
       enemy->value = MAKE_BCD(100);
       enemy->bullet_cooldown = 75;
+      enemy->bullet_type = 2;
       break;
     case 7:
       enemy->sprite_top_offset = 0;
@@ -190,6 +196,7 @@ void createEnemies() {
       enemies_remaining += 2;
       enemy->value = MAKE_BCD(125);
       enemy->bullet_cooldown = 50;
+      enemy->bullet_type = 3;
       break;
     case 8:
       enemy->sprite_top_offset = 0;
@@ -203,6 +210,7 @@ void createEnemies() {
       enemies_remaining += 1;
       enemy->value = MAKE_BCD(125);
       enemy->bullet_cooldown = 50;
+      enemy->bullet_type = 3;
       break;
     case 9:
       enemy->sprite_top_offset = HALF_SPRITE_HEIGHT;
@@ -216,6 +224,7 @@ void createEnemies() {
       enemies_remaining += 1;
       enemy->value = MAKE_BCD(125);
       enemy->bullet_cooldown = 50;
+      enemy->bullet_type = 3;
       break;
     case 10:
       enemy->sprite_top_offset = 0;
@@ -229,6 +238,7 @@ void createEnemies() {
       enemies_remaining += 2;
       enemy->value = MAKE_BCD(150);
       enemy->bullet_cooldown = 50;
+      enemy->bullet_type = 1;
       break;
     case 11:
       enemy->sprite_top_offset = 0;
@@ -242,6 +252,7 @@ void createEnemies() {
       enemies_remaining += 2;
       enemy->value = MAKE_BCD(200);
       enemy->bullet_cooldown = 50;
+      enemy->bullet_type = 0;
       break;
     case 12:
       enemy->sprite_top_offset = 0;
@@ -255,6 +266,7 @@ void createEnemies() {
       enemies_remaining += 1;
       enemy->value = MAKE_BCD(200);
       enemy->bullet_cooldown = 50;
+      enemy->bullet_type = 0;
       break;
     case 13:
       enemy->sprite_top_offset = HALF_SPRITE_HEIGHT;
@@ -268,6 +280,7 @@ void createEnemies() {
       enemies_remaining += 1;
       enemy->value = MAKE_BCD(200);
       enemy->bullet_cooldown = 50;
+      enemy->bullet_type = 0;
       break;
     case 14:
       enemy->sprite_top_offset = 0;
@@ -281,6 +294,7 @@ void createEnemies() {
       enemies_remaining += 2;
       enemy->value = MAKE_BCD(500);
       enemy->bullet_cooldown = 10;
+      enemy->bullet_type = 1;
       break;
     }
 
@@ -554,6 +568,7 @@ void update_enemies() {
       enemies_move_down = false;
       next_wave_timer = 0;
       enemy_stage += 1;
+      player_bullet.location[1] = 0;
       if (enemies_move_delay - enemies_move_delay_decrease <= ENEMY_MOVEMENT_DELAY_MIN) {
         enemies_move_delay = ENEMY_MOVEMENT_DELAY_MIN;
       } else {
@@ -612,14 +627,43 @@ void update_enemies() {
           bullet = enemy_bullets;
           for (uint8_t j = 0; j < ENEMY_BULLETS_ARRAY_LENGTH; j++) {
             if (bullet->location[1] + SPRITE_HEIGHT <= 16 || bullet->location[1] >= 160) {
+              switch (enemies[enemy_which_will_shoot].bullet_type) {
+                case 0:
+                  bullet->speed = 1;
+                  bullet->sprite_left_offset = 3;
+                  bullet->sprite_right_offset = 3;
+                  bullet->sprite_top_offset = 0;
+                  bullet->sprite_bottom_offset = 8;
+                  set_sprite_tile(bullet->sprite_index, BULLETS_TILE_INDEX);
+                  break;
+                case 1:
+                  bullet->speed = 1;
+                  bullet->sprite_left_offset = 1;
+                  bullet->sprite_right_offset = 1;
+                  bullet->sprite_top_offset = 0;
+                  bullet->sprite_bottom_offset = 8;
+                  set_sprite_tile(bullet->sprite_index, BULLETS_TILE_INDEX + 2);
+                  break;
+                case 2:
+                  bullet->speed = 1;
+                  bullet->sprite_left_offset = 3;
+                  bullet->sprite_right_offset = 3;
+                  bullet->sprite_top_offset = 0;
+                  bullet->sprite_bottom_offset = 8;
+                  set_sprite_tile(bullet->sprite_index, BULLETS_TILE_INDEX + 4);
+                  break;
+                case 3:
+                  bullet->speed = 1;
+                  bullet->sprite_left_offset = 2;
+                  bullet->sprite_right_offset = 2;
+                  bullet->sprite_top_offset = 0;
+                  bullet->sprite_bottom_offset = 8;
+                  set_sprite_tile(bullet->sprite_index, BULLETS_TILE_INDEX + 6);
+                  break;
+              }
+
               bullet->location[0] = enemies[enemy_which_will_shoot].location[0] + enemies[enemy_which_will_shoot].sprite_left_offset - enemies[enemy_which_will_shoot].sprite_right_offset;
               bullet->location[1] = enemies[enemy_which_will_shoot].location[1] + SPRITE_HEIGHT - enemies[enemy_which_will_shoot].sprite_bottom_offset;
-              bullet->speed = 1;
-              bullet->sprite_left_offset = 3;
-              bullet->sprite_right_offset = 3;
-              bullet->sprite_top_offset = 0;
-              bullet->sprite_bottom_offset = 8;
-              set_sprite_tile(bullet->sprite_index, ENEMY_BULLETS_TILE_INDEX);
               move_sprite(bullet->sprite_index, bullet->location[0], bullet->location[1]);
 
               enemy_bullets_count++;
@@ -800,8 +844,8 @@ void init_game() {
   player_bullet.sprite_top_offset = 0;
   player_bullet.sprite_bottom_offset = 8;
   // Set player bullet sprite data.
-  set_sprite_data(PLAYER_BULLET_TILE_INDEX, player_bullet.sprite_count * TILE_INDEX_MULTIPLIER, bullet_sprites);
-  set_sprite_tile(player_bullet.sprite_index, PLAYER_BULLET_TILE_INDEX);
+  set_sprite_data(BULLETS_TILE_INDEX, BULLET_TYPES * TILE_INDEX_MULTIPLIER, bullet_sprites);
+  set_sprite_tile(player_bullet.sprite_index, BULLETS_TILE_INDEX);
   move_sprite(player_bullet.sprite_index, player_bullet.location[0], player_bullet.location[1]);
 
   // Set enemy sprite data.
