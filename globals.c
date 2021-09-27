@@ -4,6 +4,9 @@
 #include "bcd.h"
 #include "typedefs.h"
 
+bullet_t *bullet;
+enemy_t *enemy;
+
 uint8_t curr_input;
 uint8_t prev_input;
 

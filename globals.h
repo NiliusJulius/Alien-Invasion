@@ -48,6 +48,9 @@
 #define ENEMY_MOVEMENT_DELAY_DECREASE 2
 #define ENEMY_MOVEMENT_DELAY_MIN 5
 
+extern bullet_t *bullet;
+extern enemy_t *enemy;
+
 extern uint8_t curr_input;
 extern uint8_t prev_input;
 
