@@ -30,21 +30,12 @@ const uint16_t frequency[] =
 
 const unsigned char music_intro_lead[] =
 {
-  36,C5,4,BRK,36,Db5,4,BRK,36,F5,4,BRK,36,D5,4,BRK,36,F5,4,BRK,36,B4,4,BRK,36,Gb5,4,BRK,36,Ab5,4,BRK,
-  25,C5,3,BRK,25,Db5,3,BRK,25,F5,3,BRK,25,D5,3,BRK,25,F5,3,BRK,25,B4,3,BRK,25,Gb5,3,BRK,25,Ab5,3,BRK,
-	18,C5,2,BRK,18,Db5,2,BRK,18,F5,2,BRK,18,D5,2,BRK,18,F5,2,BRK,18,B4,2,BRK,18,Gb5,2,BRK,18,Ab5,2,BRK,
   18,C5,2,BRK,18,Db5,2,BRK,18,F5,2,BRK,18,D5,2,BRK,18,F5,2,BRK,18,B4,2,BRK,18,Gb5,2,BRK,18,Ab5,2,BRK,
 	0
 };
 
 const unsigned char music_intro_bass[] =
 {
-	38,A3,2,BRK,38,G3,2,BRK,38,F3,2,BRK,38,E3,2,BRK,
-  38,A3,2,BRK,38,G3,2,BRK,38,F3,2,BRK,38,E3,2,BRK,
-  26,A3,2,BRK,26,G3,2,BRK,26,F3,2,BRK,26,E3,2,BRK,
-  26,A3,2,BRK,26,G3,2,BRK,26,F3,2,BRK,26,E3,2,BRK,
-  19,A3,1,BRK,19,G3,1,BRK,19,F3,1,BRK,19,E3,1,BRK,
-  19,A3,1,BRK,19,G3,1,BRK,19,F3,1,BRK,19,E3,1,BRK,
   19,A3,1,BRK,19,G3,1,BRK,19,F3,1,BRK,19,E3,1,BRK,
   19,A3,1,BRK,19,G3,1,BRK,19,F3,1,BRK,19,E3,1,BRK,
 	0
@@ -52,29 +43,27 @@ const unsigned char music_intro_bass[] =
 
 const unsigned char music_intro_rythm[] =
 {
-  2,0x4D,2,0x4F,76,0x00,2,0x4B,2,0x58,76,0x00,2,0x4B,2,0x58,76,0x00,2,0x4B,2,0x58,76,0x00,
-  2,0x4D,2,0x4F,52,0x00,2,0x4B,2,0x58,52,0x00,2,0x4B,2,0x58,52,0x00,2,0x4B,2,0x58,52,0x00,
-	1,0x4D,1,0x4F,38,0x00,1,0x4B,1,0x58,38,0x00,1,0x4B,1,0x58,38,0x00,1,0x4B,1,0x58,38,0x00,
 	1,0x4D,1,0x4F,38,0x00,1,0x4B,1,0x58,38,0x00,1,0x4B,1,0x58,38,0x00,1,0x4B,1,0x58,38,0x00,
 	0
 };
 
 const unsigned char music_game_over_lead[] =
 {
-  18,C5,2,BRK,18,Db5,2,BRK,18,F5,2,BRK,18,D5,2,BRK,18,F5,2,BRK,18,B4,2,BRK,18,Gb5,2,BRK,18,Ab5,2,BRK,
+  28,C5,12,BRK,28,Db5,12,BRK,28,F5,12,BRK,33,D5,12,BRK,
+  38,F5,12,BRK,43,B4,12,BRK,48,Gb5,12,BRK,53,Ab5,12,BRK,
 	0
 };
 
 const unsigned char music_game_over_bass[] =
 {
-  19,A3,1,BRK,19,G3,1,BRK,19,F3,1,BRK,19,E3,1,BRK,
-  19,A3,1,BRK,19,G3,1,BRK,19,F3,1,BRK,19,E3,1,BRK,
+  29,A3,11,BRK,29,G3,11,BRK,29,F3,11,BRK,34,E3,11,BRK,
+  39,A3,11,BRK,44,G3,11,BRK,49,F3,11,BRK,54,E3,11,BRK,
 	0
 };
 
 const unsigned char music_game_over_rythm[] =
 {
-  1,0x4D,1,0x4F,38,0x00,1,0x4B,1,0x58,38,0x00,1,0x4B,1,0x58,38,0x00,1,0x4B,1,0x58,38,0x00,
+  1,0x4D,1,0x4F,78,0x00,1,0x4B,1,0x58,83,0x00,1,0x4B,1,0x58,103,0x00,1,0x4B,1,0x58,123,0x00,
 	0
 };
 
@@ -85,7 +74,7 @@ const unsigned char inst_ch3[] = {0x34,0x45,0x56,0x67,0x89,0x9A,0xAB,0xBC,0x34,0
 volatile unsigned char __at (0xFF30) wave[16];
 #endif
 
-
+bool stop_music_after;
 uint8_t music_play;
 
 const unsigned char *music_data_ch1;
@@ -121,6 +110,7 @@ void init_sound() {
 }
 
 void set_music(uint8_t song) {
+  stop_music_after = false;
 	music_play = true;
 		
 	switch (song) {
@@ -198,7 +188,11 @@ void play_music() {
 			}
 						
 			if (*music_ptr_ch1 == 0) {
-				music_ptr_ch1 = music_data_ch1;
+        if (!stop_music_after) {
+				  music_ptr_ch1 = music_data_ch1;
+        } else {
+          stop_music();
+        }
 			}
 		} 
 		music_cnt_ch1--;
@@ -281,6 +275,10 @@ void play_music() {
 		} 
 		music_cnt_ch4--;	
 	}
+}
+
+void stop_music_after_current() {
+  stop_music_after = true;
 }
 
 void stop_music() {

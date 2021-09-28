@@ -8,6 +8,7 @@
 void init_sound();
 void set_music(uint8_t song);
 void play_music();
+void stop_music_after_current();
 void stop_music();
 void restart_music();
 
