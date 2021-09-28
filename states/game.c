@@ -144,7 +144,7 @@ void createEnemies() {
       break;
     case 4:
       enemy->sprite_top_offset = 0;
-      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_bottom_offset = 2;
       enemy->sprite_left_offset = 0;
       enemy->sprite_right_offset = 0;
       enemy->top_enemy = true;
@@ -158,7 +158,7 @@ void createEnemies() {
       break;
     case 5:
       enemy->sprite_top_offset = 0;
-      enemy->sprite_bottom_offset = 1 + HALF_SPRITE_HEIGHT;
+      enemy->sprite_bottom_offset = 2 + HALF_SPRITE_HEIGHT;
       enemy->sprite_left_offset = 0;
       enemy->sprite_right_offset = 0;
       enemy->top_enemy = true;
@@ -172,7 +172,7 @@ void createEnemies() {
       break;
     case 6:
       enemy->sprite_top_offset = HALF_SPRITE_HEIGHT;
-      enemy->sprite_bottom_offset = 1;
+      enemy->sprite_bottom_offset = 2;
       enemy->sprite_left_offset = 0;
       enemy->sprite_right_offset = 0;
       enemy->top_enemy = false;
