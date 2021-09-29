@@ -558,6 +558,7 @@ void update_enemies() {
     if (next_wave_timer < 10) {
       next_wave_timer++;
     } else {
+      // Reset everything.
       enemy_movement_timer = 0;
       cur_leftmost_enemy_x = 255;
       cur_rightmost_enemy_x = 0;
@@ -569,6 +570,8 @@ void update_enemies() {
       next_wave_timer = 0;
       enemy_stage += 1;
       player_bullet.location[1] = 0;
+      player_bullet.location[0] = 0;
+      move_sprite(player_bullet.sprite_index, 0, 0);
       if (enemies_move_delay - enemies_move_delay_decrease <= ENEMY_MOVEMENT_DELAY_MIN) {
         enemies_move_delay = ENEMY_MOVEMENT_DELAY_MIN;
       } else {
