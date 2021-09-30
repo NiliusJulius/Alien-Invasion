@@ -21,6 +21,8 @@ void main() {
   font_set(min_font);
 
   set_bkg_data(37, 31, background_tile_data);
+  set_bkg_data(128, 15, large_ship1_tile_data);
+  set_bkg_data(143, 32, large_ship2_tile_data);
   set_bkg_data(69, 57, intro_tile_data);
 
   high_score = MAKE_BCD(0);
